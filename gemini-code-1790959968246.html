@@ -1,0 +1,3013 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VANGUARD CAPITAL & TECH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6366f1">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Vanguard Capital">
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <style>
+    [data-theme="dark"] {
+      --bg-main: #090d16;
+      --bg-card: #131a29;
+      --bg-input: rgba(255, 255, 255, 0.05);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="light"] {
+      --bg-main: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-input: #f8fafc;
+      --border-color: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+    }
+
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-light: rgba(99, 102, 241, 0.15);
+      --success: #10b981;
+      --success-light: rgba(16, 185, 129, 0.15);
+      --warning: #f59e0b;
+      --warning-light: rgba(245, 158, 11, 0.15);
+      --danger: #ef4444;
+      --danger-light: rgba(239, 68, 68, 0.15);
+      --teal: #14b8a6;
+      --teal-light: rgba(20, 184, 166, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; justify-content: center; transition: background-color 0.3s, color 0.3s; }
+
+    .app-container { width: 100%; max-width: 480px; min-height: 100vh; background-color: var(--bg-main); display: flex; flex-direction: column; position: relative; padding-bottom: 75px; box-shadow: 0 0 50px rgba(0,0,0,0.3); }
+
+    #login-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; background: var(--bg-main); z-index: 2000; padding: 16px; overflow-y: auto; }
+    .login-card { background: var(--bg-card); border: 1px solid var(--border-color); padding: 24px 18px 18px; border-radius: 24px; box-shadow: var(--shadow); width: 100%; max-width: 420px; text-align: center; display: flex; flex-direction: column; max-height: 95vh; overflow-y: auto; }
+    .login-brand { width: 50px; height: 50px; background: linear-gradient(135deg, var(--primary), var(--teal)); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: white; }
+    .login-card h2 { font-size: 1.25rem; font-weight: 800; margin-bottom: 4px; }
+    .login-card p { color: var(--text-muted); font-size: 0.78rem; margin-bottom: 14px; }
+
+    .input-group { margin-bottom: 10px; text-align: left; }
+    .input-group label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 3px; text-transform: uppercase; }
+
+    input, select, textarea { width: 100%; padding: 9px 11px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-main); font-size: 0.85rem; outline: none; transition: all 0.2s; }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+
+    .login-btn { width: 100%; padding: 11px; background: linear-gradient(135deg, var(--primary), var(--primary-hover)); border: none; border-radius: 10px; color: white; font-weight: 700; font-size: 0.88rem; cursor: pointer; margin-top: 6px; }
+    .login-toggle-btn { background: transparent; border: none; color: var(--primary); font-size: 0.78rem; font-weight: 700; margin-top: 10px; cursor: pointer; text-decoration: underline; display: block; width: 100%; text-align: center; }
+    
+    .error-msg { color: var(--danger); font-size: 0.75rem; margin-top: 8px; display: none; font-weight: 600; text-align: center; }
+    .success-msg { color: var(--success); font-size: 0.75rem; margin-top: 8px; display: none; font-weight: 600; text-align: center; }
+
+    .login-version-badge { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-color); font-size: 0.68rem; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+    #app-screen { display: none; width: 100%; flex-direction: column; }
+    header { padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
+    .app-title h1 { font-size: 1.05rem; font-weight: 800; letter-spacing: 0.5px; }
+    .app-title p { font-size: 0.7rem; color: var(--text-muted); }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+
+    .db-status { font-size: 0.65rem; font-weight: 800; padding: 4px 8px; border-radius: 12px; background: var(--teal-light); color: var(--teal); display: flex; align-items: center; gap: 4px; }
+
+    .btn-theme-toggle { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .user-badge { width: 34px; height: 34px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; color: white; cursor: pointer; }
+
+    .bcv-widget { background: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+    .bcv-top { display: flex; justify-content: space-between; align-items: center; }
+    .bcv-tag { background: var(--teal-light); color: var(--teal); padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800; display: flex; align-items: center; gap: 4px; }
+    .bcv-converter-inputs { display: flex; gap: 8px; align-items: center; }
+    .bcv-box { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .bcv-box span { font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+    .bcv-box input { padding: 6px 8px; font-weight: 700; font-size: 0.82rem; }
+
+    .content-area { padding: 14px; flex: 1; }
+    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .card-metric { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 12px; }
+    .card-metric h3 { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+    .card-metric p { font-size: 1.2rem; font-weight: 800; }
+
+    .actions { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
+    .btn-action { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); padding: 7px 10px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+    .form-container { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px; margin-bottom: 14px; }
+    .form-container h2 { font-size: 0.9rem; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .form-grid { display: flex; flex-direction: column; gap: 8px; }
+
+    .phone-input-group { display: flex; gap: 6px; }
+    .btn-contact-picker { background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 10px; padding: 0 10px; color: var(--text-muted); font-weight: 600; font-size: 0.78rem; white-space: nowrap; }
+
+    .btn-add { background: linear-gradient(135deg, var(--primary), var(--primary-hover)); color: white; border: none; padding: 10px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+    .table-container { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; margin-bottom: 14px; }
+    .table-wrapper { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 650px; }
+    th, td { padding: 9px 11px; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: middle; }
+    th { background: rgba(0,0,0,0.05); color: var(--text-muted); font-size: 0.68rem; text-transform: uppercase; font-weight: 700; }
+    td { font-size: 0.8rem; }
+
+    .quota-box { background: var(--bg-input); border: 1px solid var(--border-color); padding: 6px 8px; border-radius: 8px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+    .quota-info { font-size: 0.72rem; }
+    .btn-quota-status { padding: 4px 8px; border-radius: 6px; font-size: 0.68rem; font-weight: 800; border: none; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .btn-quota-status.paid { background: var(--success-light); color: var(--success); }
+    .btn-quota-status.pending { background: var(--warning-light); color: var(--warning); }
+    .btn-quota-status.delinquent { background: var(--danger-light); color: var(--danger); border: 1px solid var(--danger); }
+
+    .btn-icon { padding: 3px 6px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-input); cursor: pointer; font-size: 0.7rem; font-weight: 600; color: var(--text-main); display: inline-flex; align-items: center; gap: 4px; margin-right: 2px; }
+    .btn-edit { background: var(--primary-light); color: var(--primary); border: none; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 0.7rem; cursor: pointer; margin-right: 4px; }
+    .btn-delete { background: var(--danger-light); color: var(--danger); border: none; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 0.7rem; cursor: pointer; }
+
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 62px; background: var(--bg-card); border-top: 1px solid var(--border-color); display: flex; justify-space-around; align-items: center; z-index: 1000; padding: 0 4px; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--text-muted); border: none; background: transparent; font-size: 0.65rem; font-weight: 600; cursor: pointer; flex: 1; }
+    .nav-item.active { color: var(--primary); }
+
+    .more-menu { position: fixed; bottom: 68px; right: 50%; transform: translateX(230px); background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 8px; display: none; flex-direction: column; gap: 4px; box-shadow: var(--shadow); z-index: 1100; width: 230px; }
+    @media (max-width: 480px) { .more-menu { right: 10px; transform: none; } }
+    .more-item { display: flex; align-items: center; gap: 8px; padding: 9px; color: var(--text-main); border: none; background: transparent; font-size: 0.8rem; font-weight: 600; border-radius: 8px; width: 100%; text-align: left; }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(6px); display: none; justify-content: center; align-items: center; z-index: 3000; padding: 14px; }
+    .modal-card { background: var(--bg-card); border: 1px solid var(--border-color); padding: 18px; border-radius: 20px; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; }
+    .modal-card h3 { font-size: 1.05rem; margin-bottom: 10px; }
+    .modal-preview { background: var(--bg-input); border: 1px dashed var(--primary); padding: 10px; border-radius: 10px; font-family: monospace; font-size: 0.78rem; white-space: pre-wrap; margin: 10px 0; color: var(--text-muted); max-height: 220px; overflow-y: auto; }
+    .modal-buttons { display: flex; gap: 8px; margin-top: 10px; }
+    .btn-wa { background: #25d366; color: white; border: none; flex: 1; padding: 9px; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; }
+    .btn-save-edit { background: var(--primary); color: white; border: none; flex: 1; padding: 9px; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; }
+    .btn-close { background: var(--text-muted); color: white; border: none; padding: 9px 12px; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ESTILOS DOCUMENTO JURÍDICO CIVIL */
+    .contract-sheet { background: #ffffff; color: #000000; padding: 28px 20px; border-radius: 12px; font-family: 'Times New Roman', Times, serif; font-size: 0.92rem; line-height: 1.5; text-align: justify; border: 1px solid #cbd5e1; box-shadow: var(--shadow); margin-top: 12px; }
+    .contract-sheet h2 { text-align: center; font-size: 1.1rem; font-weight: bold; margin-bottom: 16px; text-transform: uppercase; border-bottom: 2px solid #000; padding-bottom: 4px; }
+    .contract-sheet p { margin-bottom: 10px; text-indent: 20px; }
+    .contract-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.82rem; }
+    .contract-table th, .contract-table td { border: 1px solid #000 !important; padding: 5px 7px; text-align: center; color: #000 !important; background: transparent !important; }
+    .contract-signatures { margin-top: 40px; display: flex; justify-content: space-between; text-align: center; }
+    .signature-box { width: 45%; border-top: 1px solid #000; padding-top: 4px; font-size: 0.82rem; }
+
+    @media print {
+      body { background: white !important; color: black !important; }
+      .app-container { max-width: 100% !important; box-shadow: none !important; padding-bottom: 0 !important; }
+      header, .bcv-widget, .actions, .bottom-nav, .more-menu, .form-container, .btn-delete, .btn-edit, .modal-overlay, #login-screen { display: none !important; }
+      .tab-content { display: block !important; }
+      .tab-content:not(.active) { display: none !important; }
+      .contract-sheet { border: none !important; box-shadow: none !important; padding: 0 !important; font-size: 11pt !important; }
+      .card-metric, .table-container { border: 1px solid #cbd5e1 !important; background: white !important; color: black !important; }
+      th { background: #f1f5f9 !important; color: #0f172a !important; }
+      td { color: #0f172a !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- Login & Solicitud de Registro / Préstamo Public Screen -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div class="login-brand"><i data-lucide="shield-check" style="width:26px; height:26px;"></i></div>
+      <h2>VANGUARD CAPITAL & TECH</h2>
+      <p id="login-subtitle">Inversiones, Cobranzas y Tecnología</p>
+      
+      <!-- FORMULARIO 1: LOGIN PRINCIPAL -->
+      <form id="form-login" onsubmit="handleLogin(event)">
+        <div class="input-group">
+          <label>Usuario</label>
+          <input type="text" id="username" placeholder="Ingresa tu usuario" required>
+        </div>
+        <div class="input-group">
+          <label>Contraseña</label>
+          <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="login-btn">Acceder al Sistema</button>
+        <button type="button" class="login-toggle-btn" onclick="showAuthView('register')">📝 Solicitar Acceso Tercero</button>
+        <button type="button" class="login-toggle-btn" style="color:var(--teal);" onclick="showAuthView('loan_request')">📋 Solicitud de Préstamo / Producto (Futuros Clientes)</button>
+      </form>
+
+      <!-- FORMULARIO 2: SOLICITUD DE REGISTRO TERCERO -->
+      <form id="form-register" style="display:none;" onsubmit="handleRegisterRequest(event)">
+        <div class="input-group">
+          <label>Nombre Completo</label>
+          <input type="text" id="reg-fullname" placeholder="Ej: Juan Pérez" required>
+        </div>
+        <div class="input-group">
+          <label>Correo Electrónico</label>
+          <input type="email" id="reg-email" placeholder="correo@ejemplo.com" required>
+        </div>
+        <div class="input-group">
+          <label>Nombre de Usuario</label>
+          <input type="text" id="reg-username" placeholder="Usuario para entrar" required>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+          <div class="input-group">
+            <label>Nacimiento</label>
+            <input type="date" id="reg-dob" required>
+          </div>
+          <div class="input-group">
+            <label>Teléfono</label>
+            <input type="text" id="reg-phone" placeholder="+58..." required>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Contraseña Requerida</label>
+          <input type="password" id="reg-password" placeholder="Mín 3 letras, 3 núm, 1 especial" required>
+          <small style="font-size:0.65rem; color:var(--text-muted); display:block; margin-top:2px;">
+            📌 Regla: Mínimo 3 letras, 3 números y 1 carácter especial (ej: @, #, *, $).
+          </small>
+        </div>
+        <button type="submit" class="login-btn" style="background: linear-gradient(135deg, var(--teal), #0d9488);">Enviar Solicitud</button>
+        <button type="button" class="login-toggle-btn" onclick="showAuthView('login')">← Volver al Login</button>
+      </form>
+
+      <!-- FORMULARIO 3: SOLICITUD DE PRÉSTAMO / PRODUCTO ENLACE DIRECTO PÚBLICO -->
+      <form id="form-loan-request" style="display:none;" onsubmit="handlePublicLoanRequest(event)">
+        <div class="input-group">
+          <label>Tipo de Solicitud Requerida</label>
+          <select id="req-type" onchange="togglePublicRequestTypeFields()" required>
+            <option value="prestamo" selected>💵 Préstamo en Dinero (Efectivo / Transferencia)</option>
+            <option value="producto">📦 Producto o Mercancía a Crédito</option>
+          </select>
+        </div>
+
+        <div class="input-group" id="req-product-desc-group" style="display:none;">
+          <label>¿Qué Producto o Mercancía Necesitas?</label>
+          <input type="text" id="req-product-desc" placeholder="Ej: Teléfono Xiaomi Redmi Note 13, Molino de Café, etc.">
+        </div>
+
+        <div class="input-group">
+          <label>Cédula de Identidad</label>
+          <input type="text" id="req-ci" placeholder="V-12.345.678" required>
+        </div>
+        <div class="input-group">
+          <label>Nombre Completo</label>
+          <input type="text" id="req-fullname" placeholder="Nombre y Apellidos" required>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+          <div class="input-group">
+            <label>Teléfono Contacto</label>
+            <input type="text" id="req-phone" placeholder="+58..." required>
+          </div>
+          <div class="input-group">
+            <label>Estado Civil</label>
+            <select id="req-marital-status" required>
+              <option value="soltero(a)">Soltero(a)</option>
+              <option value="casado(a)">Casado(a)</option>
+              <option value="divorciado(a)">Divorciado(a)</option>
+              <option value="viudo(a)">Viudo(a)</option>
+            </select>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Lugar de Trabajo / Actividad</label>
+          <input type="text" id="req-workplace" placeholder="Empresa o Comercio" required>
+        </div>
+        <div class="input-group">
+          <label>Dirección Habitación</label>
+          <input type="text" id="req-address" placeholder="Dirección exacta" required>
+        </div>
+        <div class="input-group">
+          <label>Monto Aprox. Solicitado ($ USD)</label>
+          <input type="number" id="req-amount" placeholder="Ej: 500.00" step="0.01" min="1" required>
+        </div>
+
+        <div style="text-align:left; border-top:1px solid var(--border-color); padding-top:8px; margin-top:8px;">
+          <label style="font-size:0.7rem; font-weight:800; color:var(--teal); display:block; margin-bottom:6px;">📎 ADJUNTAR DOCUMENTOS OBLIGATORIOS (PDF / IMAGEN)</label>
+          
+          <div class="input-group">
+            <label>1. Copia de Cédula (PDF / Imagen)</label>
+            <input type="file" id="file-ci" accept="application/pdf,image/*" required>
+          </div>
+          <div class="input-group">
+            <label>2. Copia del RIF (PDF / Imagen)</label>
+            <input type="file" id="file-rif" accept="application/pdf,image/*" required>
+          </div>
+          <div class="input-group">
+            <label>3. Estado de Cuenta Bancario & Movimientos (PDF)</label>
+            <input type="file" id="file-bank" accept="application/pdf" required>
+          </div>
+          <div class="input-group">
+            <label>4. Foto del Rostro sosteniendo la Cédula (Imagen / PDF)</label>
+            <input type="file" id="file-photo" accept="image/*,application/pdf" required>
+          </div>
+        </div>
+
+        <button type="submit" class="login-btn" style="background: linear-gradient(135deg, var(--primary), var(--teal));">Enviar Solicitud de Crédito</button>
+        <button type="button" class="login-toggle-btn" id="btn-back-to-login-from-req" onclick="showAuthView('login')">← Volver al Login</button>
+      </form>
+
+      <p id="error-msg" class="error-msg"></p>
+      <p id="success-msg" class="success-msg"></p>
+      
+      <div class="login-version-badge">
+        <i data-lucide="code-2" style="width:14px; height:14px;"></i> Versión 4.0.0 (Build 2026)
+      </div>
+    </div>
+  </div>
+
+  <!-- App Main Screen -->
+  <div id="app-screen">
+    <header>
+      <div class="app-title">
+        <h1 id="header-app-name">VANGUARD CAPITAL & TECH</h1>
+        <p id="header-user-role">Sistema de Inversiones y Cobranzas</p>
+      </div>
+      <div class="header-actions">
+        <div class="db-status" id="db-status-badge">☁ Nube OK</div>
+        <button class="btn-theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Cambiar Tema">
+          <i data-lucide="sun"></i>
+        </button>
+        <div class="user-badge" id="header-user-badge" onclick="logout()" title="Cerrar Sesión">B</div>
+      </div>
+    </header>
+
+    <!-- Conversor BCV Móvil -->
+    <div class="bcv-widget">
+      <div class="bcv-top">
+        <div class="bcv-tag"><i data-lucide="refresh-cw" style="width:12px;"></i> TASA BCV OFICIAL</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted);">
+          Tasa: <input type="number" id="bcv-rate-input" value="36.50" step="0.01" oninput="updateBcvRate(this.value)" style="width: 65px; padding: 2px 4px; display: inline-block;">
+        </div>
+      </div>
+      <div class="bcv-converter-inputs">
+        <div class="bcv-box">
+          <span>USD ($)</span>
+          <input type="number" id="usd-input" value="1" step="0.01" oninput="convertUsdToBs()">
+        </div>
+        <i data-lucide="arrow-right-left" style="width:14px; color:var(--text-muted); margin-top:12px;"></i>
+        <div class="bcv-box">
+          <span>VES (Bs.)</span>
+          <input type="number" id="bs-input" value="36.50" step="0.01" oninput="convertBsToUsd()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Área de Contenido -->
+    <div class="content-area">
+
+      <!-- MÓDULO 12: APROBACIÓN DE USUARIOS TERCEROS (MASTER BRAYAN) -->
+      <div id="tab-master-users" class="tab-content">
+        <div class="form-container">
+          <h2><i data-lucide="user-check" style="width:16px; color:var(--primary);"></i> Panel de Solicitudes y Usuarios Terceros</h2>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">
+            Aprobación, notificación por WhatsApp y eliminación de accesos de terceros.
+          </p>
+        </div>
+
+        <div class="table-container">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Usuario / Nombre</th>
+                  <th>Contacto / Teléfono</th>
+                  <th>Nacimiento</th>
+                  <th>Estado Acceso</th>
+                  <th>Acción / Notificación</th>
+                </tr>
+              </thead>
+              <tbody id="master-users-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 13: SOLICITUDES DE PRÉSTAMOS DE CLIENTES (MASTER BRAYAN) -->
+      <div id="tab-client-loan-requests" class="tab-content">
+        <div class="actions">
+          <button class="btn-action" style="background:#25d366; color:white; border:none;" onclick="sharePublicFormWhatsApp()">📲 Enviar Link por WhatsApp</button>
+          <button class="btn-action" style="background:var(--teal); color:white; border:none;" onclick="copyPublicFormLink()">🔗 Copiar Link Directo</button>
+        </div>
+
+        <div class="form-container">
+          <h2><i data-lucide="inbox" style="width:16px; color:var(--teal);"></i> Módulo de Solicitudes de Préstamos y Productos</h2>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">
+            Aprobar solicitud, configurar crédito/cuotas, vincular a cobranzas y generar contrato legal automáticamente.
+          </p>
+        </div>
+
+        <div class="table-container">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tipo / Cliente</th>
+                  <th>Contacto / Trabajo</th>
+                  <th>Monto Solicitado</th>
+                  <th>Documentos Adjuntos</th>
+                  <th>Estado & Gestión Master</th>
+                </tr>
+              </thead>
+              <tbody id="client-requests-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 1: PRÉSTAMOS -->
+      <div id="tab-loans" class="tab-content active">
+        <div class="actions">
+          <button class="btn-action" onclick="window.print()"><i data-lucide="printer" style="width:14px;"></i> Imprimir Reporte</button>
+          <button class="btn-action master-only-inline" onclick="resetMonthlyPayments('loans')"><i data-lucide="rotate-ccw" style="width:14px;"></i> Reiniciar Nuevo Mes</button>
+        </div>
+
+        <div class="summary-grid">
+          <div class="card-metric master-only-card">
+            <h3>Capital Colocado</h3>
+            <p id="loans-capital" style="color: var(--primary);">$0.00</p>
+          </div>
+          <div class="card-metric master-only-card">
+            <h3>Ganancia Proyectada</h3>
+            <p id="loans-interest">$0.00</p>
+          </div>
+          <div class="card-metric" id="loans-paid-card-metric" style="grid-column: 1 / -1;">
+            <h3>Total Cobrado</h3>
+            <p id="loans-paid" style="color: var(--success);">$0.00</p>
+          </div>
+          <div class="card-metric master-only-card">
+            <h3>Pendiente / Mora</h3>
+            <p id="loans-pending" style="color: var(--danger);">$0.00</p>
+          </div>
+        </div>
+
+        <div class="form-container">
+          <h2><i data-lucide="plus-circle" style="width:16px;"></i> Registrar Préstamo</h2>
+          <form onsubmit="addLoanRecord(event)">
+            <div class="form-grid">
+              <input type="text" id="loan-name" placeholder="Nombre Deudor" required>
+              <div class="phone-input-group">
+                <input type="text" id="loan-phone" placeholder="Teléfono (+58...)" required>
+                <button type="button" class="btn-contact-picker" onclick="pickContact('loan-name', 'loan-phone')">📇 Buscar</button>
+              </div>
+              <input type="number" id="loan-amount" placeholder="Capital Préstamo ($)" step="0.01" min="1" required>
+              <input type="number" id="loan-rate" placeholder="Interés Total (%)" step="0.1" min="0" required>
+              <select id="loan-frequency" required>
+                <option value="mensual" selected>Cuotas Mensuales</option>
+                <option value="quincenal">Cuotas Quincenales</option>
+                <option value="semanal">Cuotas Semanales</option>
+              </select>
+              
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+                <div>
+                  <label style="font-size:0.68rem; font-weight:700; color:var(--text-muted);">INICIO DEUDAS</label>
+                  <input type="date" id="loan-date" required>
+                </div>
+                <div>
+                  <label style="font-size:0.68rem; font-weight:700; color:var(--text-muted);">FIN DEUDAS</label>
+                  <input type="date" id="loan-date-end">
+                </div>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:8px; margin-top:2px;">
+                <input type="checkbox" id="loan-no-end" onchange="toggleNoEndDate('loan')" style="width:auto;">
+                <label for="loan-no-end" style="font-size:0.75rem; font-weight:700; color:var(--text-muted); cursor:pointer;">☑️ Sin Fecha Final (Indefinido)</label>
+              </div>
+
+              <button type="submit" class="btn-add">+ Registrar Préstamo</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="table-container">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Deudor</th>
+                  <th>Contacto</th>
+                  <th class="master-only-th">Capital / %</th>
+                  <th>Frecuencia & Status</th>
+                  <th>Cuotas Mensuales Individuales para Cobro</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="loans-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 2: PRODUCTOS A CRÉDITO -->
+      <div id="tab-products" class="tab-content">
+        <div class="actions">
+          <button class="btn-action" onclick="window.print()"><i data-lucide="printer" style="width:14px;"></i> Imprimir Reporte</button>
+          <button class="btn-action master-only-inline" onclick="resetMonthlyPayments('products')"><i data-lucide="rotate-ccw" style="width:14px;"></i> Reiniciar Nuevo Mes</button>
+        </div>
+
+        <div class="summary-grid">
+          <div class="card-metric master-only-card">
+            <h3>Ventas Crédito</h3>
+            <p id="products-capital" style="color: var(--primary);">$0.00</p>
+          </div>
+          <div class="card-metric" id="products-paid-card-metric" style="grid-column: 1 / -1;">
+            <h3>Total Cobrado</h3>
+            <p id="products-paid" style="color: var(--success);">$0.00</p>
+          </div>
+          <div class="card-metric master-only-card" style="grid-column: 1 / -1;">
+            <h3>Pendiente / Mora por Cobrar</h3>
+            <p id="products-pending" style="color: var(--danger);">$0.00</p>
+          </div>
+        </div>
+
+        <div class="form-container">
+          <h2><i data-lucide="package-plus" style="width:16px;"></i> Registrar Producto a Crédito</h2>
+          <form onsubmit="addProductRecord(event)">
+            <div class="form-grid">
+              <input type="text" id="product-name" placeholder="Deudor" required>
+              <div class="phone-input-group">
+                <input type="text" id="product-phone" placeholder="Teléfono (+58...)" required>
+                <button type="button" class="btn-contact-picker" onclick="pickContact('product-name', 'product-phone')">📇 Buscar</button>
+              </div>
+              <input type="text" id="product-desc" placeholder="Producto / Concepto" required>
+              <input type="number" id="product-amount" placeholder="Monto Total ($)" step="0.01" min="1" required>
+              <select id="product-frequency" required>
+                <option value="semanal">Cuotas Semanales</option>
+                <option value="quincenal">Cuotas Quincenales</option>
+                <option value="mensual" selected>Cuotas Mensuales</option>
+              </select>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+                <div>
+                  <label style="font-size:0.68rem; font-weight:700; color:var(--text-muted);">INICIO DEUDAS</label>
+                  <input type="date" id="product-date" required>
+                </div>
+                <div>
+                  <label style="font-size:0.68rem; font-weight:700; color:var(--text-muted);">FIN DEUDAS</label>
+                  <input type="date" id="product-date-end">
+                </div>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:8px; margin-top:2px;">
+                <input type="checkbox" id="product-no-end" onchange="toggleNoEndDate('product')" style="width:auto;">
+                <label for="product-no-end" style="font-size:0.75rem; font-weight:700; color:var(--text-muted); cursor:pointer;">☑️ Sin Fecha Final (Indefinido)</label>
+              </div>
+
+              <button type="submit" class="btn-add">+ Registrar Crédito</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="table-container">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Deudor</th>
+                  <th>Contacto</th>
+                  <th>Producto</th>
+                  <th>Frecuencia & Status</th>
+                  <th>Cuotas Mensuales Individuales para Cobro</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="products-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 3: MOROSOS -->
+      <div id="tab-delinquents" class="tab-content master-only-tab">
+        <div class="actions">
+          <button class="btn-action" onclick="window.print()"><i data-lucide="printer" style="width:14px;"></i> Imprimir Reporte Morosos</button>
+        </div>
+
+        <div class="summary-grid">
+          <div class="card-metric">
+            <h3>Cuotas Morosas</h3>
+            <p id="delinquent-count" style="color: var(--danger);">0</p>
+          </div>
+          <div class="card-metric">
+            <h3>Multas Acumuladas</h3>
+            <p id="delinquent-fines-total" style="color: var(--warning);">$0.00</p>
+          </div>
+          <div class="card-metric" style="grid-column: 1 / -1; border-color: var(--danger);">
+            <h3>TOTAL DEUDA + MULTAS</h3>
+            <p id="delinquent-total-amount" style="font-size: 1.8rem; color: var(--danger);">$0.00</p>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Origen</th>
+                  <th>Cliente</th>
+                  <th>Contacto</th>
+                  <th>Cuota Vencida</th>
+                  <th>Cuota Base</th>
+                  <th>Días Atraso / Multa BCV</th>
+                  <th>Total a Cobrar</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="delinquents-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 11: CONTRATO JURÍDICO CIVIL -->
+      <div id="tab-contract" class="tab-content master-only-tab">
+        <div class="actions">
+          <button class="btn-action" onclick="sendContractWhatsApp()"><i data-lucide="send" style="width:14px; color:#25d366;"></i> Enviar por WhatsApp</button>
+          <button class="btn-action" onclick="window.print()"><i data-lucide="printer" style="width:14px;"></i> Imprimir Contrato Legal</button>
+        </div>
+
+        <div class="form-container">
+          <h2><i data-lucide="file-signature" style="width:16px;"></i> Generador de Contrato Civil Persona a Persona</h2>
+          <div class="form-grid">
+            <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted);">SELECCIONAR CLIENTE / REGISTRO</label>
+            <select id="contract-client-select" onchange="loadContractClientData()">
+              <option value="">-- Seleccionar de la base de datos --</option>
+            </select>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+              <div>
+                <label style="font-size:0.7rem; font-weight:700; color:var(--text-muted);">CÉDULA DE IDENTIDAD</label>
+                <input type="text" id="contract-ci" placeholder="V-12.345.678" oninput="generateContractDocument()">
+              </div>
+              <div>
+                <label style="font-size:0.7rem; font-weight:700; color:var(--text-muted);">NOMBRE COMPLETO</label>
+                <input type="text" id="contract-fullname" placeholder="Nombre y Apellidos" oninput="generateContractDocument()">
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+              <div>
+                <label style="font-size:0.7rem; font-weight:700; color:var(--text-muted);">TELÉFONO DEUDOR</label>
+                <input type="text" id="contract-phone" placeholder="+58..." oninput="generateContractDocument()">
+              </div>
+              <div>
+                <label style="font-size:0.7rem; font-weight:700; color:var(--text-muted);">ESTADO CIVIL CLIENTE</label>
+                <select id="contract-marital-status" onchange="generateContractDocument()">
+                  <option value="soltero(a)" selected>Soltero(a)</option>
+                  <option value="casado(a)">Casado(a)</option>
+                  <option value="divorciado(a)">Divorciado(a)</option>
+                  <option value="viudo(a)">Viudo(a)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+              <div>
+                <label style="font-size:0.7rem; font-weight:700; color:var(--text-muted);">LUGAR DE TRABAJO</label>
+                <input type="text" id="contract-workplace" placeholder="Empresa o Actividad Comercial" oninput="generateContractDocument()">
+              </div>
+              <div>
+                <label style="font-size:0.7rem; font-weight:700; color:var(--text-muted);">DIRECCIÓN HABITACIÓN</label>
+                <input type="text" id="contract-address" placeholder="Ej: Av. Las Américas, Mérida" oninput="generateContractDocument()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="contract-sheet" id="contract-document-body">
+          <h2>DOCUMENTO PRIVADO DE RECONOCIMIENTO DE DEUDA Y COMPROMISO DE PAGO</h2>
+          <p>
+            Entre el ciudadano <strong>Brayan Yosue Ramírez Uzcátegui</strong>, venezolano, mayor de edad, <strong>soltero</strong>, titular de la Cédula de Identidad N° <strong>V-22.658.780</strong>, domiciliado en la ciudad de Mérida, Municipio Libertador del Estado Mérida, actuando en su carácter de representante legal de <strong>VANGUARD CAPITAL & TECH</strong> (Corporación Vanguardia Global, C.A.), quien en lo sucesivo y para todos los efectos del presente contrato se denominará <strong>EL ACREEDOR</strong>, por una parte; y por la otra el ciudadano(a) <strong id="doc-fullname">[NOMBRE COMPLETO DEUDOR]</strong>, venezolano(a), mayor de edad, <strong id="doc-marital-status">soltero(a)</strong>, titular de la Cédula de Identidad N° <strong id="doc-ci">[CÉDULA DEUDOR]</strong>, con número telefónico de contacto N° <strong id="doc-phone">[TELÉFONO DEUDOR]</strong>, domiciliado en <strong id="doc-address">[DIRECCIÓN HABITACIÓN]</strong>, con lugar de trabajo ubicado en <strong id="doc-workplace">[LUGAR DE TRABAJO]</strong>, quien en lo adelante se denominará <strong>EL DEUDOR</strong>, se ha convenido en celebrar de buena fe y libre de todo vicio de consentimiento el presente contrato civil de compromiso de pago sujeto a las siguientes cláusulas jurídicas:
+          </p>
+          <p>
+            <strong>PRIMERA (DEL ORIGEN Y CAUSA LÍCITA DE LA OBLIGACIÓN):</strong> De conformidad con el artículo 1.141 del Código Civil Venezolano, EL DEUDOR reconoce de manera explícita, voluntaria e irrevocable que sostiene una obligación financiera líquida, cierta y exigible a favor de EL ACREEDOR originada en fecha <strong id="doc-start-date">--/--/----</strong> por concepto de: <strong id="doc-debt-concept">[CONCEPTO DE LA DEUDA]</strong>.
+          </p>
+          <p>
+            <strong>SEGUNDA (MONTO TOTAL Y MONEDA DE REFERENCIA CAMBIARIA):</strong> La suma total acordada a liquidar entre las partes asciende a la cantidad de <strong id="doc-total-usd">$0.00 USD</strong>. Cumpliendo con los lineamientos del Banco Central de Venezuela (BCV) y la jurisprudencia de la Sala Constitucional del Tribunal Supremo de Justicia sobre obligaciones pactadas en moneda extranjera, los pagos se efectuarán en Bolívares al tipo de cambio oficial del BCV vigente para la fecha efectiva de cada pago, estimado a la fecha de suscripción en <strong id="doc-bcv-rate">Bs. 36.50</strong> por dólar norteamericano.
+          </p>
+          <p id="doc-clause-third-text">
+            <strong>TERCERA (CALENDARIO DE PAGO Y PLAZOS):</strong> EL DEUDOR se obliga a cancelar el saldo total adeudado conforme al plazo estipulado que inicia el <strong id="doc-start-date-2">--/--/----</strong> y culmina el <strong id="doc-end-date">--/--/----</strong>, desglosado en un total de <strong id="doc-quotas-count">0</strong> cuota(s) de frecuencia <strong id="doc-frequency-str">mensual</strong>, según la siguiente tabla de vencimiento:
+          </p>
+
+          <table class="contract-table" id="doc-quotas-table">
+            <thead>
+              <tr>
+                <th>N° Cuota</th>
+                <th>Fecha Límite Pago</th>
+                <th>Monto USD ($)</th>
+                <th>Tasa BCV Ref.</th>
+                <th>Monto Estimado (Bs.)</th>
+              </tr>
+            </thead>
+            <tbody id="doc-quotas-tbody">
+              <tr><td colspan="5">Seleccione un cliente para proyectar el calendario legal de pagos.</td></tr>
+            </tbody>
+          </table>
+
+          <p>
+            <strong>CUARTA (CLÁUSULA PENAL Y MORA):</strong> Con fundamento en la autonomía de la voluntad consagrada en los artículos 1.133, 1.159, 1.257 y 1.264 del Código Civil Venezolano, las partes pactan expresamente que el incumplimiento o retraso injustificado en cualquiera de los pagos generará una sanción o penalidad por mora equivalente a: $2,00 USD (al cambio BCV) por cada 2 días de mora; $10,00 USD por cada 15 días de atraso y $20,00 USD por cada mes calendario de retraso acumulado.
+          </p>
+          <p>
+            <strong>QUINTA (RENUNCIA DE DOMICILIO Y JURISDICCIÓN COMPETENTE):</strong> Para todos los efectos legales, aclaraciones o eventual ejecución judicial derivada del presente documento, las partes eligen como domicilio especial e irrevocable a la ciudad de Mérida. En consecuencia, EL DEUDOR renuncia expresamente al fuero de su domicilio general y declara someterse formalmente a la <strong>Jurisdicción y Competencia de los Tribunales Ordinarios de la Circunscripción Judicial del Estado Mérida</strong>.
+          </p>
+          <p>
+            Se firman dos (02) ejemplares de un mismo tenor y a un solo efecto en la ciudad de Mérida, Estado Mérida, a los <span id="doc-current-day">02</span> días del mes de <span id="doc-current-month">Octubre</span> del año <span id="doc-current-year">2026</span>.
+          </p>
+
+          <div class="contract-signatures">
+            <div class="signature-box">
+              <strong>EL ACREEDOR</strong><br>
+              VANGUARD CAPITAL & TECH<br>
+              Brayan Yosue Ramírez Uzcátegui<br>
+              C.I. V-22.658.780
+            </div>
+            <div class="signature-box">
+              <strong>EL DEUDOR</strong><br>
+              <span id="doc-sig-fullname">[NOMBRE CLIENTE]</span><br>
+              C.I. <span id="doc-sig-ci">[CÉDULA]</span><br>
+              <small>Teléf: <span id="doc-sig-phone">[TELÉFONO]</span></small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 4: RECAUDACIÓN CON TRAZABILIDAD -->
+      <div id="tab-collected" class="tab-content master-only-tab">
+        <div class="actions">
+          <button class="btn-action" onclick="window.print()"><i data-lucide="printer" style="width:14px;"></i> Imprimir PDF Cobros</button>
+        </div>
+
+        <div class="summary-grid">
+          <div class="card-metric">
+            <h3>Préstamos</h3>
+            <p id="collected-loans-paid" style="color: var(--success);">$0.00</p>
+          </div>
+          <div class="card-metric">
+            <h3>Productos</h3>
+            <p id="collected-products-paid" style="color: var(--success);">$0.00</p>
+          </div>
+          <div class="card-metric" style="grid-column: 1 / -1;">
+            <h3>TOTAL COBRADO AUDITADO</h3>
+            <p id="collected-total-paid" style="font-size: 1.8rem; color: var(--success);">$0.00</p>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Origen</th>
+                  <th>Deudor</th>
+                  <th>Cuota Individual Cancelada</th>
+                  <th>Cobrado Por</th>
+                  <th>Monto USD</th>
+                  <th>Monto Bs (BCV)</th>
+                </tr>
+              </thead>
+              <tbody id="collected-detail-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 5: TRABAJO / HONORARIOS -->
+      <div id="tab-work-income" class="tab-content master-only-tab">
+        <div class="actions">
+          <button class="btn-action" onclick="window.print()"><i data-lucide="printer" style="width:14px;"></i> Imprimir Reporte</button>
+        </div>
+
+        <div class="summary-grid">
+          <div class="card-metric">
+            <h3>Cobrado</h3>
+            <p id="work-paid-amount" style="color: var(--success);">$0.00</p>
+          </div>
+          <div class="card-metric">
+            <h3>Pendiente</h3>
+            <p id="work-pending-amount" style="color: var(--danger);">$0.00</p>
+          </div>
+          <div class="card-metric" style="grid-column: 1 / -1;">
+            <h3>Total Trabajo / Honorarios</h3>
+            <p id="work-total-amount" style="font-size: 1.8rem; color: var(--teal);">$0.00</p>
+          </div>
+        </div>
+
+        <div class="form-container">
+          <h2><i data-lucide="briefcase" style="width:16px;"></i> Registrar Trabajo / Honorario</h2>
+          <form onsubmit="addWorkIncome(event)">
+            <div class="form-grid">
+              <input type="text" id="work-concept" placeholder="Concepto / Servicio" required>
+              <input type="text" id="work-client" placeholder="Cliente / Empresa">
+              <input type="number" id="work-amount" placeholder="Monto ($)" step="0.01" min="0.01" required>
+              <input type="date" id="work-date" required>
+              <button type="submit" class="btn-add" style="background: var(--teal);">+ Registrar Ingreso</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="table-container">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Concepto</th>
+                  <th>Cliente</th>
+                  <th>Monto</th>
+                  <th>Fecha</th>
+                  <th>Estado</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="work-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 6: DEUDAS (PROTEGIDO) -->
+      <div id="tab-debts" class="tab-content master-only-tab">
+        <div id="debts-lock-screen" class="form-container" style="text-align: center; margin: 20px auto;">
+          <i data-lucide="lock" style="width: 40px; height: 40px; color: var(--warning); margin-bottom: 8px;"></i>
+          <h2>Módulo Protegido</h2>
+          <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 14px;">Ingresa la contraseña especial.</p>
+          <input type="password" id="debts-pass-input" placeholder="Clave Especial" style="margin-bottom: 10px;">
+          <button onclick="unlockDebtsModule()" class="btn-add">Desbloquear</button>
+          <p id="debts-error" class="error-msg">Contraseña incorrecta</p>
+        </div>
+
+        <div id="debts-content-screen" style="display: none;">
+          <div class="actions">
+            <button class="btn-action" onclick="window.print()"><i data-lucide="printer" style="width:14px;"></i> Imprimir Reporte Deudas</button>
+            <button class="btn-action" onclick="resetMonthlyPayments('debts')"><i data-lucide="rotate-ccw" style="width:14px;"></i> Reiniciar Deudas Mes</button>
+          </div>
+
+          <div class="summary-grid">
+            <div class="card-metric">
+              <h3>Pagado</h3>
+              <p id="debts-paid-amount" style="color: var(--success);">$0.00</p>
+            </div>
+            <div class="card-metric">
+              <h3>Pendiente</h3>
+              <p id="debts-pending-amount" style="color: var(--danger);">$0.00</p>
+            </div>
+            <div class="card-metric" style="grid-column: 1 / -1; border-color: var(--danger);">
+              <h3>TOTAL DEUDAS Y EGRESOS FIJOS</h3>
+              <p id="debts-grand-total" style="font-size: 1.8rem; color: var(--danger);">$0.00</p>
+            </div>
+          </div>
+
+          <div class="form-container">
+            <h2><i data-lucide="minus-circle" style="width:16px;"></i> Registrar Deuda / Egreso Fijo</h2>
+            <form onsubmit="addExpenseItem(event)">
+              <div class="form-grid">
+                <select id="expense-type" required>
+                  <option value="fija">Deuda Fija / Compromiso</option>
+                  <option value="egreso">Egreso por Concepto</option>
+                </select>
+                <input type="text" id="expense-concept" placeholder="Concepto / Detalle" required>
+                <input type="number" id="expense-amount" placeholder="Monto Total ($)" step="0.01" min="0.01" required>
+                <select id="expense-frequency" required>
+                  <option value="1">1 Pago Único (Mensual)</option>
+                  <option value="2">2 Cuotas (Quincenal)</option>
+                  <option value="4">4 Cuotas (Semanal)</option>
+                </select>
+                <input type="date" id="expense-date" required>
+                <button type="submit" class="btn-add">+ Registrar Deuda</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="table-container">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Cat.</th>
+                    <th>Concepto</th>
+                    <th>Frecuencia & Status</th>
+                    <th>Control de Cuotas Mensuales Individuales</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody id="debts-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 9: GASTOS DIARIOS -->
+      <div id="tab-daily-expenses" class="tab-content master-only-tab">
+        <div class="actions">
+          <button class="btn-action" onclick="window.print()"><i data-lucide="printer" style="width:14px;"></i> Imprimir Gastos Diarios</button>
+        </div>
+
+        <div class="summary-grid">
+          <div class="card-metric" style="grid-column: 1 / -1; border-color: var(--warning);">
+            <h3>TOTAL GASTOS DIARIOS (MES)</h3>
+            <p id="daily-expenses-total" style="font-size: 1.8rem; color: var(--warning);">$0.00</p>
+          </div>
+        </div>
+
+        <div class="form-container">
+          <h2><i data-lucide="shopping-cart" style="width:16px;"></i> Registrar Gasto Diario / Imprevisto</h2>
+          <form onsubmit="addDailyExpense(event)">
+            <div class="form-grid">
+              <input type="text" id="daily-expense-desc" placeholder="Descripción del gasto (ej: Almuerzo, Transporte)" required>
+              <input type="number" id="daily-expense-amount" placeholder="Monto ($)" step="0.01" min="0.01" required>
+              <input type="date" id="daily-expense-date" required>
+              <button type="submit" class="btn-add" style="background: var(--warning); color: #000;">+ Registrar Gasto Diario</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="table-container">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Descripción</th>
+                  <th>Monto USD</th>
+                  <th>Monto Bs (BCV)</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="daily-expenses-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 7: BALANCE FINAL CONSOLIDADO -->
+      <div id="tab-balance" class="tab-content master-only-tab">
+        <div class="actions">
+          <button class="btn-action" onclick="window.print()"><i data-lucide="printer" style="width:14px;"></i> Imprimir Balance General</button>
+        </div>
+
+        <div class="summary-grid">
+          <div class="card-metric">
+            <h3>Ingresos Proyectados</h3>
+            <p id="balance-expected-income" style="color: var(--primary);">$0.00</p>
+          </div>
+          <div class="card-metric">
+            <h3>Egresos Totales</h3>
+            <p id="balance-total-expenses" style="color: var(--danger);">$0.00</p>
+          </div>
+          <div class="card-metric" style="grid-column: 1 / -1; border: 2px solid var(--success);" id="balance-final-card">
+            <h3>UTILIDAD NETA (RESULTADO EJERCICIO)</h3>
+            <p id="balance-final-result" style="font-size: 2rem; color: var(--success);">$0.00</p>
+          </div>
+        </div>
+
+        <div class="form-container">
+          <h2 style="font-size:0.9rem;"><i data-lucide="scale" style="width:16px;"></i> Consolidación Total en Tiempo Real</h2>
+          <ul style="line-height: 2.2; font-size: 0.85rem; color: var(--text-muted); list-style: none;">
+            <li>➕ <strong>Ganancias Préstamos:</strong> <span id="bal-loans-expected" style="color:var(--text-main); float:right;">$0.00</span></li>
+            <li>➕ <strong>Ventas Crédito Productos:</strong> <span id="bal-products-expected" style="color:var(--text-main); float:right;">$0.00</span></li>
+            <li>➕ <strong>Honorarios Trabajo:</strong> <span id="bal-work-expected" style="color:var(--teal); float:right;">$0.00</span></li>
+            <li style="border-top: 1px solid var(--border-color); margin-top: 4px;">💵 <strong>Total Ingresos Proyectados:</strong> <span id="bal-total-income-sum" style="color:var(--primary); font-weight:800; float:right;">$0.00</span></li>
+            <li>➖ <strong>Deudas y Compromisos Fijos:</strong> <span id="bal-expenses-sum" style="color:var(--danger); float:right;">$0.00</span></li>
+            <li>➖ <strong>Gastos Diarios / Imprevistos:</strong> <span id="bal-daily-expenses-sum" style="color:var(--warning); float:right;">$0.00</span></li>
+            <li style="border-top: 2px dashed var(--border-color); margin-top: 8px; padding-top: 4px; font-size: 0.95rem;">🏆 <strong>Balance Neto Resultante:</strong> <span id="bal-final-net" style="color:var(--success); font-weight:800; float:right;">$0.00</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- MÓDULO 10: COMPARATIVA BIMENSUAL & ANÁLISIS -->
+      <div id="tab-bimonthly-analysis" class="tab-content master-only-tab">
+        <div class="actions">
+          <button class="btn-action" onclick="captureBimonthlySnapshot()"><i data-lucide="camera" style="width:14px;"></i> Guardar Cierre Bimensual</button>
+          <button class="btn-action" onclick="window.print()"><i data-lucide="printer" style="width:14px;"></i> Imprimir Análisis</button>
+        </div>
+
+        <div class="form-container">
+          <h2><i data-lucide="line-chart" style="width:16px;"></i> Evolución y Comparativa Bimensual</h2>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">
+            Comparación gráfica de rendimiento financiero cada 2 meses (60 días).
+          </p>
+          <div style="background: var(--bg-input); padding: 10px; border-radius: 12px; border: 1px solid var(--border-color);">
+            <canvas id="bimonthlyChart" style="max-height: 260px; width:100%;"></canvas>
+          </div>
+        </div>
+
+        <div class="form-container">
+          <h2><i data-lucide="brain" style="width:16px;"></i> Análisis Cualitativo del Desempeño</h2>
+          <div id="bimonthly-analysis-text" style="font-size: 0.82rem; line-height: 1.6; color: var(--text-main);">
+            Cargando análisis bimensual...
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Periodo / Fecha</th>
+                  <th>Ing. Proyectados</th>
+                  <th>Cobrado Real</th>
+                  <th>Egresos / Gastos</th>
+                  <th>Utilidad Neta</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="bimonthly-snapshots-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 8: REPORTE DIARIO -->
+      <div id="tab-daily-report" class="tab-content master-only-tab">
+        <div class="actions">
+          <button class="btn-action" onclick="window.print()"><i data-lucide="printer" style="width:14px;"></i> Imprimir Reporte Diario</button>
+        </div>
+
+        <div class="form-container">
+          <h2 style="text-align:center; display:block; font-size:1rem;">📊 REPORTE GENERAL DE OPERACIONES</h2>
+          <p style="text-align:center; color: var(--text-muted); font-size:0.75rem; margin-bottom: 12px;">
+            Fecha de Emisión: <span id="report-date-str">--/--/----</span>
+          </p>
+
+          <div class="summary-grid">
+            <div class="card-metric">
+              <h3>Total Colocado</h3>
+              <p id="report-total-placed" style="color:var(--primary);">$0.00</p>
+            </div>
+            <div class="card-metric">
+              <h3>Total Cobrado</h3>
+              <p id="report-total-collected" style="color:var(--success);">$0.00</p>
+            </div>
+            <div class="card-metric" style="grid-column: 1 / -1;">
+              <h3>Saldo Pendiente</h3>
+              <p id="report-total-pending" style="color:var(--danger);">$0.00</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Menú Desplegable "Más Módulos" -->
+    <div id="more-menu" class="more-menu">
+      <button class="more-item master-only-item" onclick="switchTab('master-users'); closeMoreMenu();"><i data-lucide="user-check" style="width:16px; color:var(--primary);"></i> Solicitudes Usuarios</button>
+      <button class="more-item master-only-item" onclick="switchTab('client-loan-requests'); closeMoreMenu();"><i data-lucide="inbox" style="width:16px; color:var(--teal);"></i> Solicitudes Préstamos</button>
+      <button class="more-item master-only-item" onclick="switchTab('delinquents'); closeMoreMenu();"><i data-lucide="alert-triangle" style="width:16px; color:var(--danger);"></i> Morosos</button>
+      <button class="more-item master-only-item" onclick="switchTab('contract'); closeMoreMenu();"><i data-lucide="file-signature" style="width:16px; color:var(--primary);"></i> Generar Contrato</button>
+      <button class="more-item master-only-item" onclick="switchTab('work-income'); closeMoreMenu();"><i data-lucide="briefcase" style="width:16px;"></i> Trabajo</button>
+      <button class="more-item master-only-item" onclick="switchTab('debts'); closeMoreMenu();"><i data-lucide="lock" style="width:16px;"></i> Deudas</button>
+      <button class="more-item master-only-item" onclick="switchTab('daily-expenses'); closeMoreMenu();"><i data-lucide="shopping-cart" style="width:16px; color:var(--warning);"></i> Gastos Diarios</button>
+      <button class="more-item master-only-item" onclick="switchTab('balance'); closeMoreMenu();"><i data-lucide="scale" style="width:16px;"></i> Balance Final</button>
+      <button class="more-item master-only-item" onclick="switchTab('bimonthly-analysis'); closeMoreMenu();"><i data-lucide="bar-chart-3" style="width:16px; color:var(--primary);"></i> Comparativa Bimensual</button>
+      <button class="more-item master-only-item" onclick="switchTab('daily-report'); closeMoreMenu();"><i data-lucide="file-text" style="width:16px;"></i> Reporte General</button>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="switchTab('loans'); closeMoreMenu();">
+        <i data-lucide="hand-coins" style="width:20px; height:20px;"></i>
+        <span>Préstamos</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('products'); closeMoreMenu();">
+        <i data-lucide="shopping-bag" style="width:20px; height:20px;"></i>
+        <span>Productos</span>
+      </button>
+      <button class="nav-item master-only-nav" onclick="switchTab('collected'); closeMoreMenu();">
+        <i data-lucide="badge-dollar-sign" style="width:20px; height:20px;"></i>
+        <span>Cobros</span>
+      </button>
+      <button class="nav-item" onclick="toggleMoreMenu()">
+        <i data-lucide="grid" style="width:20px; height:20px;"></i>
+        <span>Módulos</span>
+      </button>
+    </nav>
+  </div>
+
+</div>
+
+<!-- MODAL DE APROBACIÓN Y CONFIGURACIÓN FINANCIERA (SOLICITUD A CONTRATO) -->
+<div id="approve-request-modal" class="modal-overlay">
+  <div class="modal-card">
+    <h3>⚡ Aprobar y Generar Contrato</h3>
+    <input type="hidden" id="app-req-index">
+
+    <div class="form-grid">
+      <div>
+        <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">CLIENTE SOLICITANTE</label>
+        <input type="text" id="app-req-client-name" readonly style="opacity: 0.8;">
+      </div>
+
+      <div>
+        <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">TIPO DE FINANCIAMIENTO</label>
+        <select id="app-req-type" onchange="toggleApproveTypeFields()">
+          <option value="prestamo">💵 Préstamo en Dinero Efectivo / Transferencia</option>
+          <option value="producto">📦 Producto o Mercancía a Crédito</option>
+        </select>
+      </div>
+
+      <div id="app-req-desc-group" style="display:none;">
+        <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">DESCRIPCIÓN DEL PRODUCTO / BIEN</label>
+        <input type="text" id="app-req-desc" placeholder="Ej: Xiaomi Redmi Note 13">
+      </div>
+
+      <div>
+        <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">MONTO APROBADO ($ USD)</label>
+        <input type="number" id="app-req-amount" step="0.01" min="1" required>
+      </div>
+
+      <div id="app-req-rate-group">
+        <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">INTERÉS TOTAL (%)</label>
+        <input type="number" id="app-req-rate" value="10" step="0.1" min="0">
+      </div>
+
+      <div>
+        <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">FRECUENCIA DE PAGO</label>
+        <select id="app-req-frequency">
+          <option value="mensual" selected>Cuotas Mensuales</option>
+          <option value="quincenal">Cuotas Quincenales</option>
+          <option value="semanal">Cuotas Semanales</option>
+        </select>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+        <div>
+          <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">INICIO DEUDAS</label>
+          <input type="date" id="app-req-start-date" required>
+        </div>
+        <div>
+          <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">FIN DEUDAS</label>
+          <input type="date" id="app-req-end-date">
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" id="app-req-no-end" onchange="toggleNoEndDate('app-req')" style="width:auto;">
+        <label for="app-req-no-end" style="font-size:0.75rem; font-weight:700; color:var(--text-muted); cursor:pointer;">☑️ Sin Fecha Final (Indefinido)</label>
+      </div>
+    </div>
+
+    <div class="modal-buttons">
+      <button class="btn-save-edit" style="background:var(--success);" onclick="confirmApproveRequestAndGenerateContract()">📜 Generar Contrato e Integrar</button>
+      <button class="btn-close" onclick="closeApproveRequestModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDICIÓN DE CLIENTE -->
+<div id="edit-modal" class="modal-overlay">
+  <div class="modal-card">
+    <h3>Editar Registro de Cliente</h3>
+    <input type="hidden" id="edit-module">
+    <input type="hidden" id="edit-index">
+
+    <div class="form-grid">
+      <div>
+        <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">NOMBRE DEUDOR / CONCEPTO</label>
+        <input type="text" id="edit-name" required>
+      </div>
+      
+      <div id="edit-phone-group">
+        <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">TELÉFONO (+58...)</label>
+        <input type="text" id="edit-phone">
+      </div>
+
+      <div id="edit-desc-group" style="display:none;">
+        <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">DESCRIPCIÓN DEL PRODUCTO</label>
+        <input type="text" id="edit-desc">
+      </div>
+
+      <div class="master-only-card">
+        <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">MONTO TOTAL ($)</label>
+        <input type="number" id="edit-amount" step="0.01" min="1" required>
+      </div>
+
+      <div id="edit-rate-group" class="master-only-card">
+        <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">INTERÉS TOTAL (%)</label>
+        <input type="number" id="edit-rate" step="0.1" min="0">
+      </div>
+
+      <div>
+        <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">FRECUENCIA DE PAGO</label>
+        <select id="edit-frequency" required>
+          <option value="mensual">Mensual (1 Pago / Cuota)</option>
+          <option value="quincenal">Quincenal (2 Pagos / Cuotas)</option>
+          <option value="semanal">Semanal (4 Pagos / Cuotas)</option>
+        </select>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+        <div>
+          <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">INICIO DEUDAS</label>
+          <input type="date" id="edit-date" required>
+        </div>
+        <div>
+          <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">FIN DEUDAS</label>
+          <input type="date" id="edit-date-end">
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" id="edit-no-end" onchange="toggleNoEndDate('edit')" style="width:auto;">
+        <label for="edit-no-end" style="font-size:0.75rem; font-weight:700; color:var(--text-muted); cursor:pointer;">☑️ Sin Fecha Final</label>
+      </div>
+    </div>
+
+    <div class="modal-buttons">
+      <button class="btn-save-edit" onclick="saveRecordEdit()">💾 Guardar Cambios</button>
+      <button class="btn-close" onclick="closeEditModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Recordatorio BCV -->
+<div id="reminder-modal" class="modal-overlay">
+  <div class="modal-card">
+    <h3>Notificación / Recordatorio</h3>
+    <input type="hidden" id="remind-module">
+    <input type="hidden" id="remind-item-idx">
+    <input type="hidden" id="remind-quota-idx">
+
+    <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-muted); display:block; margin-bottom:4px;">Tasa BCV del Día (Bs / $)</label>
+    <input type="number" id="remind-bcv" placeholder="Ej: 36.50" step="0.01" style="margin-bottom: 10px;" oninput="updateReminderMessage()">
+
+    <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-muted); display:block; margin-bottom:4px;">Mensaje de WhatsApp</label>
+    <textarea id="remind-message" rows="8" style="resize: vertical; font-family: inherit; margin-bottom: 10px;"></textarea>
+
+    <div class="modal-buttons">
+      <button class="btn-wa" onclick="sendReminderWhatsApp()">📢 WhatsApp</button>
+      <button class="btn-close" onclick="closeReminderModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Recibo por Cuota -->
+<div id="receipt-modal" class="modal-overlay">
+  <div class="modal-card">
+    <h3>Generar Recibo por Cuota Individual</h3>
+    <input type="hidden" id="receipt-module">
+    <input type="hidden" id="receipt-item-idx">
+    <input type="hidden" id="receipt-quota-idx">
+    
+    <label style="font-size: 0.75rem; font-weight: bold; color: var(--text-muted); display:block; margin-bottom:4px;">Referencia Bancaria / Pago</label>
+    <input type="text" id="receipt-ref" placeholder="Ej: Ref 987654 / Pago Móvil" style="margin-bottom: 10px;" oninput="updateReceiptPreview()">
+    
+    <div id="receipt-preview" class="modal-preview">Cargando recibo...</div>
+
+    <div class="modal-buttons">
+      <button class="btn-wa" onclick="confirmAndSendReceiptWhatsApp()">📲 Enviar Recibo y Marcar Pagado</button>
+      <button class="btn-close" onclick="closeReceiptModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // CONFIGURACIÓN FIREBASE
+  const firebaseConfig = {
+    apiKey: "AIzaSyANDGB6pob1KWH0BllFmU1sn6o8FEHQfJc",
+    authDomain: "inversion-ramirez.firebaseapp.com",
+    databaseURL: "https://inversion-ramirez-default-rtdb.firebaseio.com",
+    projectId: "inversion-ramirez",
+    storageBucket: "inversion-ramirez.firebasestorage.app",
+    messagingSenderId: "346032453265",
+    appId: "1:346032453265:web:8d5e223154cf20b429b130",
+    measurementId: "G-SB3QCSZH0B"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const MASTER_USER = "Brayan";
+  const MASTER_PASS = "lia123*";
+  const DEBTS_PASS_CORRECT = "yosu123";
+
+  let currentBcvRate = parseFloat(localStorage.getItem("bcv_rate_v1")) || 36.50;
+
+  let loansData = [];
+  let productsData = [];
+  let workIncomeData = [];
+  let debtsData = [];
+  let dailyExpensesData = [];
+  let bimonthlySnapshots = [];
+  let usersRequestsData = [];
+  let clientLoanRequestsData = [];
+
+  let currentUserRole = "master"; // 'master' o 'tercero'
+  let currentUsername = "";
+
+  function initCloudSync() {
+    db.ref('finanzas_data').on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        loansData = data.loans || [];
+        productsData = data.products || [];
+        workIncomeData = data.work || [];
+        debtsData = data.debts || [];
+        dailyExpensesData = data.daily_expenses || [];
+        bimonthlySnapshots = data.bimonthly_snapshots || [];
+        usersRequestsData = data.users_requests || [];
+        clientLoanRequestsData = data.client_loan_requests || [];
+        if (data.bcv_rate) {
+          currentBcvRate = parseFloat(data.bcv_rate);
+          localStorage.setItem("bcv_rate_v1", currentBcvRate);
+        }
+      } else {
+        loansData = JSON.parse(localStorage.getItem("loans_data_v12")) || [];
+        productsData = JSON.parse(localStorage.getItem("products_data_v12")) || [];
+        workIncomeData = JSON.parse(localStorage.getItem("work_income_data_v6")) || [];
+        debtsData = JSON.parse(localStorage.getItem("debts_data_v8")) || [];
+        dailyExpensesData = JSON.parse(localStorage.getItem("daily_expenses_data_v5")) || [];
+        bimonthlySnapshots = JSON.parse(localStorage.getItem("bimonthly_snapshots_v5")) || [];
+        usersRequestsData = JSON.parse(localStorage.getItem("users_requests_v1")) || [];
+        clientLoanRequestsData = JSON.parse(localStorage.getItem("client_loan_requests_v1")) || [];
+        saveData();
+      }
+      document.getElementById("bcv-rate-input").value = currentBcvRate.toFixed(2);
+      convertUsdToBs();
+      renderAll();
+      document.getElementById("db-status-badge").innerText = "☁️ Nube OK";
+    }, (error) => {
+      console.warn("Error con Firebase, usando LocalStorage", error);
+      document.getElementById("db-status-badge").innerText = "📱 Modo Local";
+      loansData = JSON.parse(localStorage.getItem("loans_data_v12")) || [];
+      productsData = JSON.parse(localStorage.getItem("products_data_v12")) || [];
+      workIncomeData = JSON.parse(localStorage.getItem("work_income_data_v6")) || [];
+      debtsData = JSON.parse(localStorage.getItem("debts_data_v8")) || [];
+      dailyExpensesData = JSON.parse(localStorage.getItem("daily_expenses_data_v5")) || [];
+      bimonthlySnapshots = JSON.parse(localStorage.getItem("bimonthly_snapshots_v5")) || [];
+      usersRequestsData = JSON.parse(localStorage.getItem("users_requests_v1")) || [];
+      clientLoanRequestsData = JSON.parse(localStorage.getItem("client_loan_requests_v1")) || [];
+      document.getElementById("bcv-rate-input").value = currentBcvRate.toFixed(2);
+      convertUsdToBs();
+      renderAll();
+    });
+  }
+
+  function saveData() {
+    localStorage.setItem("loans_data_v12", JSON.stringify(loansData));
+    localStorage.setItem("products_data_v12", JSON.stringify(productsData));
+    localStorage.setItem("work_income_data_v6", JSON.stringify(workIncomeData));
+    localStorage.setItem("debts_data_v8", JSON.stringify(debtsData));
+    localStorage.setItem("daily_expenses_data_v5", JSON.stringify(dailyExpensesData));
+    localStorage.setItem("bimonthly_snapshots_v5", JSON.stringify(bimonthlySnapshots));
+    localStorage.setItem("users_requests_v1", JSON.stringify(usersRequestsData));
+    localStorage.setItem("client_loan_requests_v1", JSON.stringify(clientLoanRequestsData));
+    localStorage.setItem("bcv_rate_v1", currentBcvRate);
+
+    db.ref('finanzas_data').set({
+      loans: loansData,
+      products: productsData,
+      work: workIncomeData,
+      debts: debtsData,
+      daily_expenses: dailyExpensesData,
+      bimonthly_snapshots: bimonthlySnapshots,
+      users_requests: usersRequestsData,
+      client_loan_requests: clientLoanRequestsData,
+      bcv_rate: currentBcvRate,
+      lastUpdate: new Date().toISOString()
+    }).catch(err => console.error("Error al guardar en Firebase:", err));
+  }
+
+  function validateStrictPassword(password) {
+    const lettersCount = (password.match(/[a-zA-Z]/g) || []).length;
+    const digitsCount = (password.match(/[0-9]/g) || []).length;
+    const specialCount = (password.match(/[^a-zA-Z0-9]/g) || []).length;
+    return lettersCount >= 3 && digitsCount >= 3 && specialCount >= 1;
+  }
+
+  function togglePublicRequestTypeFields() {
+    const type = document.getElementById("req-type").value;
+    const descGroup = document.getElementById("req-product-desc-group");
+    if (type === "producto") {
+      descGroup.style.display = "block";
+      document.getElementById("req-product-desc").required = true;
+    } else {
+      descGroup.style.display = "none";
+      document.getElementById("req-product-desc").required = false;
+    }
+  }
+
+  function showAuthView(viewName) {
+    document.getElementById("error-msg").style.display = "none";
+    document.getElementById("success-msg").style.display = "none";
+    document.getElementById("form-login").style.display = "none";
+    document.getElementById("form-register").style.display = "none";
+    document.getElementById("form-loan-request").style.display = "none";
+
+    if (viewName === 'register') {
+      document.getElementById("form-register").style.display = "block";
+      document.getElementById("login-subtitle").innerText = "Solicitud de Acceso para Nuevo Tercero";
+    } else if (viewName === 'loan_request') {
+      document.getElementById("form-loan-request").style.display = "block";
+      document.getElementById("login-subtitle").innerText = "Formulario Oficial de Solicitud de Préstamo / Producto";
+      togglePublicRequestTypeFields();
+    } else {
+      document.getElementById("form-login").style.display = "block";
+      document.getElementById("login-subtitle").innerText = "Inversiones, Cobranzas y Tecnología";
+    }
+  }
+
+  function handleRegisterRequest(event) {
+    event.preventDefault();
+    const fullname = document.getElementById("reg-fullname").value.trim();
+    const email = document.getElementById("reg-email").value.trim();
+    const username = document.getElementById("reg-username").value.trim();
+    const dob = document.getElementById("reg-dob").value;
+    const phone = document.getElementById("reg-phone").value.trim();
+    const password = document.getElementById("reg-password").value.trim();
+
+    const errElem = document.getElementById("error-msg");
+    const succElem = document.getElementById("success-msg");
+    errElem.style.display = "none";
+    succElem.style.display = "none";
+
+    if (!validateStrictPassword(password)) {
+      errElem.innerText = "❌ La contraseña no cumple con la regla: Mínimo 3 letras, 3 números y 1 carácter especial.";
+      errElem.style.display = "block";
+      return;
+    }
+
+    const exists = usersRequestsData.some(u => u.username.toLowerCase() === username.toLowerCase() || u.email.toLowerCase() === email.toLowerCase());
+    if (exists || username.toLowerCase() === MASTER_USER.toLowerCase()) {
+      errElem.innerText = "❌ El usuario o correo ya se encuentra registrado o en solicitud.";
+      errElem.style.display = "block";
+      return;
+    }
+
+    usersRequestsData.push({
+      fullname, email, username, dob, phone, password,
+      status: 'pendiente',
+      requestDate: new Date().toLocaleDateString('es-ES')
+    });
+
+    saveData();
+    succElem.innerText = "✅ Solicitud enviada con éxito. Espera la aprobación del Usuario Master (Brayan).";
+    succElem.style.display = "block";
+    event.target.reset();
+  }
+
+  function readFileAsBase64(fileInput) {
+    return new Promise((resolve, reject) => {
+      const file = fileInput.files[0];
+      if (!file) return resolve({ name: "", data: "", type: "" });
+      const reader = new FileReader();
+      reader.onload = () => resolve({ name: file.name, type: file.type, data: reader.result });
+      reader.onerror = error => reject(error);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handlePublicLoanRequest(event) {
+    event.preventDefault();
+    const reqType = document.getElementById("req-type").value;
+    const productDesc = reqType === "producto" ? document.getElementById("req-product-desc").value.trim() : "Préstamo en Efectivo/Transferencia";
+    const ci = document.getElementById("req-ci").value.trim();
+    const fullname = document.getElementById("req-fullname").value.trim();
+    const phone = document.getElementById("req-phone").value.trim();
+    const maritalStatus = document.getElementById("req-marital-status").value;
+    const workplace = document.getElementById("req-workplace").value.trim();
+    const address = document.getElementById("req-address").value.trim();
+    const amount = parseFloat(document.getElementById("req-amount").value);
+
+    const errElem = document.getElementById("error-msg");
+    const succElem = document.getElementById("success-msg");
+    errElem.style.display = "none";
+    succElem.style.display = "none";
+
+    try {
+      const fileCi = await readFileAsBase64(document.getElementById("file-ci"));
+      const fileRif = await readFileAsBase64(document.getElementById("file-rif"));
+      const fileBank = await readFileAsBase64(document.getElementById("file-bank"));
+      const filePhoto = await readFileAsBase64(document.getElementById("file-photo"));
+
+      clientLoanRequestsData.push({
+        reqType, productDesc, ci, fullname, phone, maritalStatus, workplace, address, amount,
+        files: { fileCi, fileRif, fileBank, filePhoto },
+        status: 'pendiente',
+        requestDate: new Date().toLocaleDateString('es-ES')
+      });
+
+      saveData();
+      succElem.innerText = "✅ Solicitud enviada correctamente. El expediente digital será evaluado por el Master.";
+      succElem.style.display = "block";
+      event.target.reset();
+    } catch (e) {
+      errElem.innerText = "❌ Error al procesar los archivos adjuntos. Intenta con archivos más pequeños.";
+      errElem.style.display = "block";
+    }
+  }
+
+  function handleLogin(event) {
+    event.preventDefault();
+    const user = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value.trim();
+
+    const errElem = document.getElementById("error-msg");
+    errElem.style.display = "none";
+
+    if (user === MASTER_USER && pass === MASTER_PASS) {
+      localStorage.setItem("is_logged_in", "true");
+      localStorage.setItem("logged_user_role", "master");
+      localStorage.setItem("logged_username", MASTER_USER);
+      checkSession();
+      return;
+    }
+
+    const foundUser = usersRequestsData.find(u => u.username === user && u.password === pass);
+
+    if (foundUser) {
+      if (foundUser.status === 'aprobado') {
+        localStorage.setItem("is_logged_in", "true");
+        localStorage.setItem("logged_user_role", "tercero");
+        localStorage.setItem("logged_username", foundUser.username);
+        checkSession();
+      } else if (foundUser.status === 'pendiente') {
+        errElem.innerText = "⏳ Tu usuario está en estado PENDIENTE de aprobación por el Master (Brayan).";
+        errElem.style.display = "block";
+      } else if (foundUser.status === 'suspendido') {
+        errElem.innerText = "🟠 Tu usuario se encuentra SUSPENDIDO. Contacta al Master.";
+        errElem.style.display = "block";
+      } else {
+        errElem.innerText = "🔴 Tu usuario ha sido CANCELADO.";
+        errElem.style.display = "block";
+      }
+    } else {
+      errElem.innerText = "❌ Usuario o contraseña incorrectos";
+      errElem.style.display = "block";
+    }
+  }
+
+  // DETECCIÓN DE LINK PÚBLICO DIRECTO AL FORMULARIO DE CLIENTES
+  function checkSession() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action');
+    const isHashSolicitar = window.location.hash === '#solicitar';
+
+    if (action === 'solicitar' || isHashSolicitar) {
+      document.getElementById("login-screen").style.display = "flex";
+      document.getElementById("app-screen").style.display = "none";
+      showAuthView('loan_request');
+      document.getElementById("btn-back-to-login-from-req").style.display = "none";
+      return;
+    }
+
+    const isLoggedIn = localStorage.getItem("is_logged_in");
+    currentUserRole = localStorage.getItem("logged_user_role") || "master";
+    currentUsername = localStorage.getItem("logged_username") || "Brayan";
+
+    const savedTheme = localStorage.getItem("app_theme") || "dark";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+    updateThemeIcon(savedTheme);
+
+    if (isLoggedIn === "true") {
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("app-screen").style.display = "flex";
+
+      document.getElementById("header-user-badge").innerText = currentUsername.charAt(0).toUpperCase();
+
+      if (currentUserRole === 'tercero') {
+        document.getElementById("header-user-role").innerText = `Usuario Tercero: ${currentUsername}`;
+        applyTerceroRestrictions();
+      } else {
+        document.getElementById("header-user-role").innerText = `Master: ${MASTER_USER}`;
+        removeTerceroRestrictions();
+      }
+
+      initCloudSync();
+    } else {
+      document.getElementById("login-screen").style.display = "flex";
+      document.getElementById("app-screen").style.display = "none";
+      showAuthView('login');
+    }
+  }
+
+  // GENERACIÓN DE URL CON HTTPS SEGURO PARA WHATSAPP
+  function getPublicFormUrl() {
+    let rawOrigin = window.location.origin;
+    if (!rawOrigin || rawOrigin === "null" || rawOrigin.startsWith("file://")) {
+      rawOrigin = "https://" + window.location.host;
+    }
+    const pathname = window.location.pathname;
+    return `${rawOrigin}${pathname}?action=solicitar#solicitar`;
+  }
+
+  // COPIA DEL LINK DIRECTO AL PORTAPAPELES
+  function copyPublicFormLink() {
+    const publicUrl = getPublicFormUrl();
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(publicUrl).then(() => {
+        alert(`✅ ¡Link directo copiado al portapapeles!\n\nEnvía este enlace a tus clientes:\n${publicUrl}`);
+      }).catch(() => {
+        prompt("Copia este enlace directo para tus clientes:", publicUrl);
+      });
+    } else {
+      prompt("Copia este enlace directo para tus clientes:", publicUrl);
+    }
+  }
+
+  // COMPARTIR DIRECTAMENTE VÍA WHATSAPP CON ENLACE HIPERTEXTO SEGURO
+  function sharePublicFormWhatsApp() {
+    const publicUrl = getPublicFormUrl();
+    let text = `🏛 *VANGUARD CAPITAL & TECH*\n*FORMULARIO OFICIAL DE SOLICITUD DE CRÉDITO*\n-----------------------------------\nEstimado cliente, ingrese al siguiente enlace oficial para completar su solicitud de préstamo o producto a crédito y adjuntar sus documentos digitales:\n\n${publicUrl}\n\n_Complete todos los campos requeridos para la evaluación de su expediente digital._`;
+
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+  }
+
+  function applyTerceroRestrictions() {
+    document.querySelectorAll('.master-only-tab').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.master-only-item').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.master-only-nav').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.master-only-inline').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.master-only-card').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.master-only-th').forEach(el => el.style.display = 'none');
+
+    document.getElementById("loans-paid-card-metric").style.gridColumn = "1 / -1";
+    document.getElementById("products-paid-card-metric").style.gridColumn = "1 / -1";
+  }
+
+  function removeTerceroRestrictions() {
+    document.querySelectorAll('.master-only-item').forEach(el => el.style.display = 'flex');
+    document.querySelectorAll('.master-only-nav').forEach(el => el.style.display = 'flex');
+    document.querySelectorAll('.master-only-inline').forEach(el => el.style.display = 'inline-flex');
+    document.querySelectorAll('.master-only-card').forEach(el => el.style.display = 'block');
+    document.querySelectorAll('.master-only-th').forEach(el => el.style.display = 'table-cell');
+
+    document.getElementById("loans-paid-card-metric").style.gridColumn = "span 1";
+    document.getElementById("products-paid-card-metric").style.gridColumn = "span 1";
+  }
+
+  function logout() {
+    localStorage.removeItem("is_logged_in");
+    localStorage.removeItem("logged_user_role");
+    localStorage.removeItem("logged_username");
+    sessionStorage.removeItem("debts_unlocked");
+    checkSession();
+  }
+
+  function updateUserStatus(index, newStatus) {
+    if (usersRequestsData[index]) {
+      usersRequestsData[index].status = newStatus;
+      saveData();
+      renderMasterUsersTable();
+    }
+  }
+
+  function deleteUserByMaster(index) {
+    if (confirm(`¿Seguro que deseas ELIMINAR definitivamente al usuario tercero "${usersRequestsData[index].username}"?`)) {
+      usersRequestsData.splice(index, 1);
+      saveData();
+      renderMasterUsersTable();
+    }
+  }
+
+  function sendUserStatusWhatsApp(index) {
+    const u = usersRequestsData[index];
+    if (!u) return;
+
+    let cleanPhone = u.phone ? u.phone.replace(/[^0-9]/g, '') : '';
+    let isApproved = u.status === 'aprobado';
+
+    let text = `🏛 *VANGUARD CAPITAL & TECH*\n*NOTIFICACIÓN DE SOLICITUD DE ACCESO*\n-----------------------------------\n`;
+    text += `Hola *${u.fullname}* (@${u.username}),\n\n`;
+
+    if (isApproved) {
+      text += `✅ *¡TU SOLICITUD HA SIDO APROBADA!*\nYa tienes acceso habilitado a la plataforma de Vanguard Capital.\n\n👤 *Usuario:* ${u.username}\n🔑 *Clave:* (La que definiste en tu registro)\n\nPuedes ingresar ahora para gestionar clientes y cobros.`;
+    } else {
+      text += `🔴 *ESTADO DE SOLICITUD:* ${u.status.toUpperCase()}\nLamentamos informarle que su solicitud de acceso tercero no ha sido aprobada o se encuentra ${u.status}.`;
+    }
+
+    window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(text)}`, '_blank');
+  }
+
+  function renderMasterUsersTable() {
+    const tbody = document.getElementById("master-users-tbody");
+    tbody.innerHTML = "";
+
+    if (usersRequestsData.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No hay solicitudes de nuevos usuarios registradas.</td></tr>`;
+      return;
+    }
+
+    usersRequestsData.forEach((u, idx) => {
+      let badgeColor = "var(--warning)";
+      if (u.status === 'aprobado') badgeColor = "var(--success)";
+      else if (u.status === 'suspendido') badgeColor = "var(--warning)";
+      else if (u.status === 'cancelado') badgeColor = "var(--danger)";
+
+      tbody.innerHTML += `<tr>
+        <td><strong>${u.username}</strong><br><small style="color:var(--text-muted);">${u.fullname}</small></td>
+        <td>${u.email}<br><small style="color:var(--text-muted);">${u.phone}</small></td>
+        <td>${formatDate(u.dob)}</td>
+        <td><strong style="color:${badgeColor}; text-transform:uppercase; font-size:0.75rem;">${u.status}</strong></td>
+        <td>
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <select onchange="updateUserStatus(${idx}, this.value)" style="padding:4px; font-size:0.72rem;">
+              <option value="pendiente" ${u.status==='pendiente'?'selected':''}>🟡 Pendiente</option>
+              <option value="aprobado" ${u.status==='aprobado'?'selected':''}>🟢 Aprobado</option>
+              <option value="suspendido" ${u.status==='suspendido'?'selected':''}>🟠 Suspendido</option>
+              <option value="cancelado" ${u.status==='cancelado'?'selected':''}>🔴 Cancelado</option>
+            </select>
+            <div style="display:flex; gap:3px;">
+              <button class="btn-icon" style="background:#25d366; color:white;" onclick="sendUserStatusWhatsApp(${idx})">📲 Notificar WA</button>
+              <button class="btn-delete" onclick="deleteUserByMaster(${idx})">🗑️ Eliminar</button>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+    });
+  }
+
+  function downloadBase64File(base64Data, filename) {
+    if (!base64Data) return alert("El archivo adjunto no está disponible.");
+    const link = document.createElement("a");
+    link.href = base64Data;
+    link.download = filename || "documento_adjunto";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  function updateClientLoanRequestStatus(index, newStatus) {
+    if (clientLoanRequestsData[index]) {
+      clientLoanRequestsData[index].status = newStatus;
+      saveData();
+      renderClientRequestsTable();
+    }
+  }
+
+  function deleteClientLoanRequest(index) {
+    if (confirm(`¿Seguro que deseas ELIMINAR la solicitud de ${clientLoanRequestsData[index].fullname}?`)) {
+      clientLoanRequestsData.splice(index, 1);
+      saveData();
+      renderClientRequestsTable();
+    }
+  }
+
+  function sendClientLoanRequestStatusWhatsApp(index) {
+    const req = clientLoanRequestsData[index];
+    if (!req) return;
+
+    let cleanPhone = req.phone ? req.phone.replace(/[^0-9]/g, '') : '';
+    let text = `🏛 *VANGUARD CAPITAL & TECH*\n*ESTADO DE SOLICITUD DE CRÉDITO*\n-----------------------------------\n`;
+    text += `Estimado(a) *${req.fullname}* (C.I. ${req.ci}),\n\n`;
+
+    if (req.status === 'aprobado') {
+      text += `✅ *¡SU SOLICITUD HA SIDO APROBADA!*\n• *Tipo:* ${req.reqType==='producto' ? 'Producto a Crédito' : 'Préstamo en Dinero'}\n• *Monto:* $${Number(req.amount).toFixed(2)} USD\n\nNos pondremos en contacto con usted para proceder con la firma del contrato legal y la entrega correspondientes.`;
+    } else if (req.status === 'negado') {
+      text += `🔴 *ESTADO DE SOLICITUD: NEGADA*\nLamentamos informarle que tras revisar sus documentos adjuntos, su solicitud no fue aprobada en esta oportunidad.`;
+    } else {
+      text += `🟡 *ESTADO DE SOLICITUD: PENDIENTE / EN REVISIÓN*\nSu solicitud de $${Number(req.amount).toFixed(2)} USD y expediente digital continúan en evaluación por parte del Comité Master.`;
+    }
+
+    window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(text)}`, '_blank');
+  }
+
+  function openApproveRequestModal(index) {
+    const req = clientLoanRequestsData[index];
+    if (!req) return;
+
+    document.getElementById("app-req-index").value = index;
+    document.getElementById("app-req-client-name").value = `${req.fullname} (${req.ci})`;
+    document.getElementById("app-req-type").value = req.reqType || "prestamo";
+    document.getElementById("app-req-desc").value = req.productDesc || "";
+    document.getElementById("app-req-amount").value = req.amount || 0;
+    
+    const todayStr = new Date().toISOString().split('T')[0];
+    document.getElementById("app-req-start-date").value = todayStr;
+
+    toggleApproveTypeFields();
+    document.getElementById("approve-request-modal").style.display = "flex";
+  }
+
+  function closeApproveRequestModal() {
+    document.getElementById("approve-request-modal").style.display = "none";
+  }
+
+  function toggleApproveTypeFields() {
+    const type = document.getElementById("app-req-type").value;
+    const descGroup = document.getElementById("app-req-desc-group");
+    const rateGroup = document.getElementById("app-req-rate-group");
+
+    if (type === "producto") {
+      descGroup.style.display = "block";
+      rateGroup.style.display = "none";
+    } else {
+      descGroup.style.display = "none";
+      rateGroup.style.display = "block";
+    }
+  }
+
+  function confirmApproveRequestAndGenerateContract() {
+    const reqIdx = parseInt(document.getElementById("app-req-index").value, 10);
+    const req = clientLoanRequestsData[reqIdx];
+    if (!req) return;
+
+    const type = document.getElementById("app-req-type").value;
+    const amount = parseFloat(document.getElementById("app-req-amount").value) || 0;
+    const frequency = document.getElementById("app-req-frequency").value;
+    const startDate = document.getElementById("app-req-start-date").value;
+    const noEndDate = document.getElementById("app-req-no-end").checked;
+    const endDate = noEndDate ? "" : document.getElementById("app-req-end-date").value;
+
+    if (!startDate) return alert("Por favor selecciona una fecha de inicio.");
+
+    if (type === "prestamo") {
+      const rate = parseFloat(document.getElementById("app-req-rate").value) || 0;
+      const gainTotal = (amount * rate) / 100;
+      const quotas = buildQuotasFromDateRange(startDate, endDate, frequency, gainTotal, noEndDate);
+
+      loansData.push({
+        name: req.fullname, phone: req.phone, ci: req.ci, address: req.address, workplace: req.workplace,
+        amount, rate, frequency, startDate, endDate, noEndDate, quotas, createdBy: currentUsername
+      });
+    } else {
+      const desc = document.getElementById("app-req-desc").value.trim() || "Producto a Crédito";
+      const quotas = buildQuotasFromDateRange(startDate, endDate, frequency, amount, noEndDate);
+
+      productsData.push({
+        name: req.fullname, phone: req.phone, ci: req.ci, address: req.address, workplace: req.workplace,
+        desc, amount, frequency, startDate, endDate, noEndDate, quotas, createdBy: currentUsername
+      });
+    }
+
+    req.status = 'aprobado';
+    saveData();
+    closeApproveRequestModal();
+
+    switchTab('contract');
+    document.getElementById("contract-ci").value = req.ci;
+    document.getElementById("contract-fullname").value = req.fullname;
+    document.getElementById("contract-phone").value = req.phone;
+    document.getElementById("contract-marital-status").value = req.maritalStatus || 'soltero(a)';
+    document.getElementById("contract-workplace").value = req.workplace;
+    document.getElementById("contract-address").value = req.address;
+
+    populateContractClientSelect();
+    
+    const targetSelectValue = type === 'prestamo' ? `loan_${loansData.length - 1}` : `product_${productsData.length - 1}`;
+    document.getElementById("contract-client-select").value = targetSelectValue;
+    loadContractClientData();
+
+    alert(`✅ Solicitud de ${req.fullname} aprobada e integrada exitosamente. ¡El contrato legal ha sido generado!`);
+  }
+
+  function renderClientRequestsTable() {
+    const tbody = document.getElementById("client-requests-tbody");
+    tbody.innerHTML = "";
+
+    if (clientLoanRequestsData.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No hay solicitudes recibidas.</td></tr>`;
+      return;
+    }
+
+    clientLoanRequestsData.forEach((req, idx) => {
+      let statusColor = "var(--warning)";
+      if (req.status === 'aprobado') statusColor = "var(--success)";
+      else if (req.status === 'negado') statusColor = "var(--danger)";
+
+      const fCi = req.files?.fileCi;
+      const fRif = req.files?.fileRif;
+      const fBank = req.files?.fileBank;
+      const fPhoto = req.files?.filePhoto;
+
+      const typeBadge = req.reqType === 'producto' ? '📦 Producto' : '💵 Préstamo';
+
+      tbody.innerHTML += `<tr>
+        <td>
+          <span style="font-size:0.68rem; font-weight:800; color:var(--teal);">${typeBadge}</span><br>
+          <strong>${req.fullname}</strong><br><small style="color:var(--text-muted);">${req.ci}</small>
+        </td>
+        <td>${req.phone}<br><small style="color:var(--text-muted);">${req.workplace}</small></td>
+        <td>
+          <strong style="color:var(--primary);">$${Number(req.amount).toFixed(2)} USD</strong><br>
+          <small style="color:var(--text-muted);">${req.reqType==='producto' ? req.productDesc : 'Efectivo'}</small>
+        </td>
+        <td>
+          <div style="display:flex; flex-wrap:wrap; gap:3px;">
+            <button class="btn-icon" onclick="downloadBase64File('${fCi?.data}', 'Cedula_${req.ci}')">📄 Cédula</button>
+            <button class="btn-icon" onclick="downloadBase64File('${fRif?.data}', 'RIF_${req.ci}')">📄 RIF</button>
+            <button class="btn-icon" onclick="downloadBase64File('${fBank?.data}', 'Banco_${req.ci}')">📄 Banco</button>
+            <button class="btn-icon" onclick="downloadBase64File('${fPhoto?.data}', 'Foto_Rostro_${req.ci}')">🖼️ Foto</button>
+          </div>
+        </td>
+        <td>
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <strong style="color:${statusColor}; text-transform:uppercase; font-size:0.72rem;">${req.status || 'pendiente'}</strong>
+            <button class="btn-action" style="background:linear-gradient(135deg, var(--primary), var(--teal)); color:white; padding:4px; font-size:0.72rem;" onclick="openApproveRequestModal(${idx})">⚡ Aprobar y Generar Contrato</button>
+            <div style="display:flex; gap:3px; align-items:center;">
+              <select onchange="updateClientLoanRequestStatus(${idx}, this.value)" style="padding:2px 4px; font-size:0.7rem;">
+                <option value="pendiente" ${(req.status||'pendiente')==='pendiente'?'selected':''}>🟡 Pendiente</option>
+                <option value="aprobado" ${req.status==='aprobado'?'selected':''}>🟢 Aprobado</option>
+                <option value="negado" ${req.status==='negado'?'selected':''}>🔴 Negado</option>
+              </select>
+              <button class="btn-icon" style="background:#25d366; color:white;" onclick="sendClientLoanRequestStatusWhatsApp(${idx})">📲 WA</button>
+              <button class="btn-delete" onclick="deleteClientLoanRequest(${idx})">🗑️</button>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+    });
+  }
+
+  function calculateFineUSD(daysOverdue) {
+    if (daysOverdue <= 0) return 0;
+    let fine = 0;
+    if (daysOverdue >= 30) {
+      const months = Math.floor(daysOverdue / 30);
+      const remDays = daysOverdue % 30;
+      fine += months * 20;
+      fine += calculateFineUSD(remDays);
+    } else if (daysOverdue >= 15) {
+      fine += 10;
+      const remDays = daysOverdue - 15;
+      fine += calculateFineUSD(remDays);
+    } else {
+      const biDays = Math.floor(daysOverdue / 2);
+      fine += biDays * 2;
+    }
+    return fine;
+  }
+
+  function toggleNoEndDate(prefix) {
+    const isChecked = document.getElementById(`${prefix}-no-end`).checked;
+    const dateEndInput = document.getElementById(`${prefix}-date-end`) || document.getElementById(`${prefix}-end-date`);
+    if (isChecked) {
+      if (dateEndInput) { dateEndInput.value = ""; dateEndInput.disabled = true; }
+    } else {
+      if (dateEndInput) { dateEndInput.disabled = false; }
+    }
+  }
+
+  function buildQuotasFromDateRange(startDateStr, endDateStr, frequency, totalAmountUSD, noEndDate = false) {
+    const quotas = [];
+
+    if (noEndDate || !endDateStr) {
+      quotas.push({
+        num: 1,
+        dueDate: startDateStr,
+        amountUSD: totalAmountUSD,
+        status: 'pendiente',
+        isIndefinite: true
+      });
+      return quotas;
+    }
+
+    let start = new Date(startDateStr + "T00:00:00");
+    let end = new Date(endDateStr + "T00:00:00");
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
+      return buildQuotasStructureFallback(startDateStr, frequency, totalAmountUSD);
+    }
+
+    const diffMs = end - start;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    let stepDays = 30;
+    if (frequency === "semanal") stepDays = 7;
+    else if (frequency === "quincenal") stepDays = 15;
+
+    let count = Math.max(1, Math.round(diffDays / stepDays));
+    const quotaAmt = totalAmountUSD / count;
+
+    for (let i = 0; i < count; i++) {
+      let nextDate = new Date(start);
+      nextDate.setDate(start.getDate() + ((i + 1) * stepDays));
+
+      if (nextDate > end) nextDate = new Date(end);
+
+      const yyyy = nextDate.getFullYear();
+      const mm = String(nextDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(nextDate.getDate()).padStart(2, '0');
+
+      quotas.push({
+        num: i + 1,
+        dueDate: `${yyyy}-${mm}-${dd}`,
+        amountUSD: quotaAmt,
+        status: 'pendiente'
+      });
+    }
+
+    return quotas;
+  }
+
+  function buildQuotasStructureFallback(startDateStr, frequency, totalAmountUSD) {
+    const quotas = [];
+    let count = 1;
+    if (frequency === "semanal") count = 4;
+    else if (frequency === "quincenal") count = 2;
+
+    const quotaAmt = totalAmountUSD / count;
+    let baseDate = new Date(startDateStr + "T00:00:00");
+
+    for (let i = 0; i < count; i++) {
+      let nextDate = new Date(baseDate);
+      if (frequency === "semanal") nextDate.setDate(baseDate.getDate() + ((i + 1) * 7));
+      else if (frequency === "quincenal") nextDate.setDate(baseDate.getDate() + ((i + 1) * 15));
+      else nextDate.setMonth(baseDate.getMonth() + (i + 1));
+
+      const yyyy = nextDate.getFullYear();
+      const mm = String(nextDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(nextDate.getDate()).padStart(2, '0');
+
+      quotas.push({
+        num: i + 1,
+        dueDate: `${yyyy}-${mm}-${dd}`,
+        amountUSD: quotaAmt,
+        status: 'pendiente'
+      });
+    }
+    return quotas;
+  }
+
+  function cycleQuotaStatus(moduleType, itemIndex, quotaIndex) {
+    let dataset = moduleType === 'loans' ? loansData : (moduleType === 'products' ? productsData : debtsData);
+    if (dataset[itemIndex] && dataset[itemIndex].quotas[quotaIndex]) {
+      let q = dataset[itemIndex].quotas[quotaIndex];
+      if (q.status === undefined) q.status = q.paid ? 'pagado' : 'pendiente';
+
+      if (q.status === 'pendiente') {
+        q.status = 'pagado';
+        q.collectedBy = currentUsername;
+      } else if (q.status === 'pagado') {
+        q.status = 'moroso';
+      } else {
+        q.status = 'pendiente';
+      }
+
+      q.paid = (q.status === 'pagado');
+      saveData();
+      renderAll();
+    }
+  }
+
+  function addLoanRecord(event) {
+    event.preventDefault();
+    const name = document.getElementById("loan-name").value.trim();
+    const phone = document.getElementById("loan-phone").value.trim();
+    const amount = parseFloat(document.getElementById("loan-amount").value);
+    const rate = parseFloat(document.getElementById("loan-rate").value);
+    const frequency = document.getElementById("loan-frequency").value;
+    const startDate = document.getElementById("loan-date").value;
+    const noEndDate = document.getElementById("loan-no-end").checked;
+    const endDate = noEndDate ? "" : document.getElementById("loan-date-end").value;
+
+    const gainTotal = (amount * rate) / 100;
+    const quotas = buildQuotasFromDateRange(startDate, endDate, frequency, gainTotal, noEndDate);
+
+    loansData.push({ name, phone, amount, rate, frequency, startDate, endDate, noEndDate, quotas, createdBy: currentUsername });
+    saveData();
+    event.target.reset();
+    document.getElementById("loan-date-end").disabled = false;
+  }
+
+  function addProductRecord(event) {
+    event.preventDefault();
+    const name = document.getElementById("product-name").value.trim();
+    const phone = document.getElementById("product-phone").value.trim();
+    const desc = document.getElementById("product-desc").value.trim();
+    const amount = parseFloat(document.getElementById("product-amount").value);
+    const frequency = document.getElementById("product-frequency").value;
+    const startDate = document.getElementById("product-date").value;
+    const noEndDate = document.getElementById("product-no-end").checked;
+    const endDate = noEndDate ? "" : document.getElementById("product-date-end").value;
+
+    const quotas = buildQuotasFromDateRange(startDate, endDate, frequency, amount, noEndDate);
+
+    productsData.push({ name, phone, desc, amount, frequency, startDate, endDate, noEndDate, quotas, createdBy: currentUsername });
+    saveData();
+    event.target.reset();
+    document.getElementById("product-date-end").disabled = false;
+  }
+
+  function deleteRecord(moduleType, index) {
+    if (currentUserRole === 'tercero') {
+      alert("🚫 Tu usuario no tiene permiso para eliminar registros.");
+      return;
+    }
+
+    if (confirm("¿Seguro que deseas eliminar este registro?")) {
+      if (moduleType === 'loans') loansData.splice(index, 1);
+      else if (moduleType === 'products') productsData.splice(index, 1);
+      else if (moduleType === 'work') workIncomeData.splice(index, 1);
+      else if (moduleType === 'debts') debtsData.splice(index, 1);
+      else if (moduleType === 'daily_expenses') dailyExpensesData.splice(index, 1);
+      else if (moduleType === 'bimonthly_snapshots') bimonthlySnapshots.splice(index, 1);
+      saveData();
+    }
+  }
+
+  function confirmAndSendReceiptWhatsApp() {
+    const mod = document.getElementById("receipt-module").value;
+    const itemIdx = document.getElementById("receipt-item-idx").value;
+    const quotaIdx = document.getElementById("receipt-quota-idx").value;
+
+    let dataset = mod === 'loans' ? loansData : productsData;
+    dataset[itemIdx].quotas[quotaIdx].status = 'pagado';
+    dataset[itemIdx].quotas[quotaIdx].paid = true;
+    dataset[itemIdx].quotas[quotaIdx].collectedBy = currentUsername;
+    saveData();
+
+    const receiptText = encodeURIComponent(generateReceiptText());
+    const item = dataset[itemIdx];
+    const cleanPhone = item.phone ? item.phone.replace(/[^0-9]/g, '') : '';
+
+    closeReceiptModal();
+    window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${receiptText}`, '_blank');
+  }
+
+  function renderAll() {
+    lucide.createIcons();
+
+    /* 1. RENDER PRÉSTAMOS CON TODAS LAS CUOTAS DESAGREGADAS */
+    const loansTbody = document.getElementById("loans-table");
+    loansTbody.innerHTML = "";
+    let lCap = 0, lIntProyectado = 0, lPaidTotal = 0, lPendingTotal = 0;
+
+    loansData.forEach((item, itemIdx) => {
+      lCap += Number(item.amount);
+      const gainTotal = (item.amount * item.rate) / 100;
+      lIntProyectado += gainTotal;
+
+      if (!item.quotas) item.quotas = buildQuotasFromDateRange(item.startDate, item.endDate, item.frequency, gainTotal, item.noEndDate);
+
+      let cleanPhone = item.phone ? item.phone.replace(/[^0-9]/g, '') : '';
+      let quotasHtml = "";
+      let pendingQuotasCount = 0;
+
+      item.quotas.forEach((q, quotaIdx) => {
+        const days = getDaysOverdue(q.dueDate);
+
+        if (q.status === undefined) q.status = q.paid ? 'pagado' : 'pendiente';
+        if (q.status === 'pendiente' && days > 0) q.status = 'moroso';
+
+        if (q.status === 'pagado') {
+          lPaidTotal += q.amountUSD;
+        } else {
+          lPendingTotal += q.amountUSD;
+          pendingQuotasCount++;
+        }
+
+        let btnClass = 'pending';
+        let btnText = '⏳ Pendiente';
+
+        if (q.status === 'pagado') { btnClass = 'paid'; btnText = '✅ Pagada'; }
+        else if (q.status === 'moroso') { btnClass = 'delinquent'; btnText = '⚠️ Moroso'; }
+
+        quotasHtml += `
+          <div class="quota-box">
+            <div class="quota-info">
+              <strong>Cuota ${q.num}:</strong> $${q.amountUSD.toFixed(2)} USD<br>
+              <small style="color:var(--text-muted);">Vence: ${formatDate(q.dueDate)} ${q.collectedBy ? ' | Cobró: '+q.collectedBy : ''}</small>
+            </div>
+            <div style="display:flex; align-items:center; gap:3px;">
+              <button class="btn-quota-status ${btnClass}" onclick="cycleQuotaStatus('loans', ${itemIdx}, ${quotaIdx})">${btnText}</button>
+              <button class="btn-icon" onclick="openReminderModal('loans', ${itemIdx}, ${quotaIdx})" title="Recordatorio">📢</button>
+              <button class="btn-icon" onclick="openReceiptModal('loans', ${itemIdx}, ${quotaIdx})" title="Recibo">🧾</button>
+            </div>
+          </div>
+        `;
+      });
+
+      const deleteBtn = currentUserRole === 'master' ? `<button class="btn-delete" onclick="deleteRecord('loans', ${itemIdx})">Eliminar</button>` : '';
+      const capitalTd = currentUserRole === 'master' ? `<td>$${Number(item.amount).toFixed(2)} <br><small style="color:var(--text-muted);">${item.rate}% int. ($${gainTotal.toFixed(2)})</small></td>` : '';
+
+      loansTbody.innerHTML += `<tr>
+        <td><strong>${item.name}</strong></td>
+        <td><a href="https://wa.me/${cleanPhone}" target="_blank" style="color:var(--primary);text-decoration:none;">📞 ${item.phone}</a></td>
+        ${capitalTd}
+        <td>
+          <span style="text-transform:capitalize;">${item.frequency}</span><br>
+          <small style="color:var(--warning); font-weight:bold;">📌 Pendientes: ${pendingQuotasCount} de ${item.quotas.length}</small>
+        </td>
+        <td><div style="max-height: 180px; overflow-y: auto;">${quotasHtml}</div></td>
+        <td>
+          <button class="btn-edit" onclick="openEditModal('loans', ${itemIdx})">✏️ Editar</button>
+          ${deleteBtn}
+        </td>
+      </tr>`;
+    });
+
+    document.getElementById("loans-capital").innerText = `$${lCap.toFixed(2)}`;
+    document.getElementById("loans-interest").innerText = `$${lIntProyectado.toFixed(2)}`;
+    document.getElementById("loans-paid").innerText = `$${lPaidTotal.toFixed(2)}`;
+    document.getElementById("loans-pending").innerText = `$${lPendingTotal.toFixed(2)}`;
+
+    /* 2. RENDER PRODUCTOS A CRÉDITO CON TODAS LAS CUOTAS DESAGREGADAS */
+    const productsTbody = document.getElementById("products-table");
+    productsTbody.innerHTML = "";
+    let pCap = 0, pPaidTotal = 0, pPendingTotal = 0;
+
+    productsData.forEach((item, itemIdx) => {
+      const totalAmt = Number(item.amount);
+      pCap += totalAmt;
+
+      if (!item.quotas) item.quotas = buildQuotasFromDateRange(item.startDate, item.endDate, item.frequency, totalAmt, item.noEndDate);
+
+      let cleanPhone = item.phone ? item.phone.replace(/[^0-9]/g, '') : '';
+      let quotasHtml = "";
+      let pendingQuotasCount = 0;
+
+      item.quotas.forEach((q, quotaIdx) => {
+        const days = getDaysOverdue(q.dueDate);
+
+        if (q.status === undefined) q.status = q.paid ? 'pagado' : 'pendiente';
+        if (q.status === 'pendiente' && days > 0) q.status = 'moroso';
+
+        if (q.status === 'pagado') {
+          pPaidTotal += q.amountUSD;
+        } else {
+          pPendingTotal += q.amountUSD;
+          pendingQuotasCount++;
+        }
+
+        let btnClass = 'pending';
+        let btnText = '⏳ Pendiente';
+
+        if (q.status === 'pagado') { btnClass = 'paid'; btnText = '✅ Pagada'; }
+        else if (q.status === 'moroso') { btnClass = 'delinquent'; btnText = '⚠️ Moroso'; }
+
+        quotasHtml += `
+          <div class="quota-box">
+            <div class="quota-info">
+              <strong>Cuota ${q.num}:</strong> $${q.amountUSD.toFixed(2)} USD<br>
+              <small style="color:var(--text-muted);">Vence: ${formatDate(q.dueDate)} ${q.collectedBy ? ' | Cobró: '+q.collectedBy : ''}</small>
+            </div>
+            <div style="display:flex; align-items:center; gap:3px;">
+              <button class="btn-quota-status ${btnClass}" onclick="cycleQuotaStatus('products', ${itemIdx}, ${quotaIdx})">${btnText}</button>
+              <button class="btn-icon" onclick="openReminderModal('products', ${itemIdx}, ${quotaIdx})" title="Recordatorio">📢</button>
+              <button class="btn-icon" onclick="openReceiptModal('products', ${itemIdx}, ${quotaIdx})" title="Recibo">🧾</button>
+            </div>
+          </div>
+        `;
+      });
+
+      const deleteBtn = currentUserRole === 'master' ? `<button class="btn-delete" onclick="deleteRecord('products', ${itemIdx})">Eliminar</button>` : '';
+
+      productsTbody.innerHTML += `<tr>
+        <td><strong>${item.name}</strong></td>
+        <td><a href="https://wa.me/${cleanPhone}" target="_blank" style="color:var(--primary);text-decoration:none;">📞 ${item.phone}</a></td>
+        <td>${item.desc} <br><small style="color:var(--text-muted);">Total: $${totalAmt.toFixed(2)}</small></td>
+        <td>
+          <span style="text-transform:capitalize;">${item.frequency}</span><br>
+          <small style="color:var(--warning); font-weight:bold;">📌 Pendientes: ${pendingQuotasCount} de ${item.quotas.length}</small>
+        </td>
+        <td><div style="max-height: 180px; overflow-y: auto;">${quotasHtml}</div></td>
+        <td>
+          <button class="btn-edit" onclick="openEditModal('products', ${itemIdx})">✏️ Editar</button>
+          ${deleteBtn}
+        </td>
+      </tr>`;
+    });
+
+    document.getElementById("products-capital").innerText = `$${pCap.toFixed(2)}`;
+    document.getElementById("products-paid").innerText = `$${pPaidTotal.toFixed(2)}`;
+    document.getElementById("products-pending").innerText = `$${pPendingTotal.toFixed(2)}`;
+
+    /* 3. RENDER MÓDULO MOROSOS AUTOMÁTICO */
+    const delinquentsTbody = document.getElementById("delinquents-table-body");
+    if (delinquentsTbody) {
+      delinquentsTbody.innerHTML = "";
+      let delinquentCount = 0;
+      let finesTotalUSD = 0;
+      let grandDelinquentTotalUSD = 0;
+
+      loansData.forEach((item, itemIdx) => {
+        if (item.quotas) {
+          item.quotas.forEach((q, quotaIdx) => {
+            const days = getDaysOverdue(q.dueDate);
+            if (q.status === 'moroso' || (q.status !== 'pagado' && days > 0)) {
+              delinquentCount++;
+              const fineUSD = calculateFineUSD(days);
+              const totalToPayUSD = q.amountUSD + fineUSD;
+              finesTotalUSD += fineUSD;
+              grandDelinquentTotalUSD += totalToPayUSD;
+
+              let cleanPhone = item.phone ? item.phone.replace(/[^0-9]/g, '') : '';
+
+              delinquentsTbody.innerHTML += `<tr>
+                <td><span style="color:var(--primary);font-weight:bold;">💵 Préstamo</span></td>
+                <td><strong>${item.name}</strong></td>
+                <td><a href="https://wa.me/${cleanPhone}" target="_blank" style="color:var(--primary);text-decoration:none;">📞 ${item.phone}</a></td>
+                <td>Cuota N° ${q.num} de ${item.quotas.length}<br><small style="color:var(--danger);">${formatDate(q.dueDate)}</small></td>
+                <td>$${q.amountUSD.toFixed(2)} USD</td>
+                <td><strong style="color:var(--danger);">${days} días</strong><br><small style="color:var(--warning);">Multa: $${fineUSD.toFixed(2)}</small></td>
+                <td><strong style="color:var(--danger); font-size:0.9rem;">$${totalToPayUSD.toFixed(2)} USD</strong><br><small>Bs. ${(totalToPayUSD * currentBcvRate).toFixed(2)}</small></td>
+                <td>
+                  <button class="btn-icon" style="background:#25d366; color:white;" onclick="openReminderModal('loans', ${itemIdx}, ${quotaIdx})">📢 Notificar</button>
+                  <button class="btn-quota-status paid" onclick="cycleQuotaStatus('loans', ${itemIdx}, ${quotaIdx})">✅ Cobrado</button>
+                </td>
+              </tr>`;
+            }
+          });
+        }
+      });
+
+      productsData.forEach((item, itemIdx) => {
+        if (item.quotas) {
+          item.quotas.forEach((q, quotaIdx) => {
+            const days = getDaysOverdue(q.dueDate);
+            if (q.status === 'moroso' || (q.status !== 'pagado' && days > 0)) {
+              delinquentCount++;
+              const fineUSD = calculateFineUSD(days);
+              const totalToPayUSD = q.amountUSD + fineUSD;
+              finesTotalUSD += fineUSD;
+              grandDelinquentTotalUSD += totalToPayUSD;
+
+              let cleanPhone = item.phone ? item.phone.replace(/[^0-9]/g, '') : '';
+
+              delinquentsTbody.innerHTML += `<tr>
+                <td><span style="color:var(--success);font-weight:bold;">📦 Producto</span></td>
+                <td><strong>${item.name}</strong><br><small style="color:var(--text-muted);">${item.desc}</small></td>
+                <td><a href="https://wa.me/${cleanPhone}" target="_blank" style="color:var(--primary);text-decoration:none;">📞 ${item.phone}</a></td>
+                <td>Cuota N° ${q.num} de ${item.quotas.length}<br><small style="color:var(--danger);">${formatDate(q.dueDate)}</small></td>
+                <td>$${q.amountUSD.toFixed(2)} USD</td>
+                <td><strong style="color:var(--danger);">${days} días</strong><br><small style="color:var(--warning);">Multa: $${fineUSD.toFixed(2)}</small></td>
+                <td><strong style="color:var(--danger); font-size:0.9rem;">$${totalToPayUSD.toFixed(2)} USD</strong><br><small>Bs. ${(totalToPayUSD * currentBcvRate).toFixed(2)}</small></td>
+                <td>
+                  <button class="btn-icon" style="background:#25d366; color:white;" onclick="openReminderModal('products', ${itemIdx}, ${quotaIdx})">📢 Notificar</button>
+                  <button class="btn-quota-status paid" onclick="cycleQuotaStatus('products', ${itemIdx}, ${quotaIdx})">✅ Cobrado</button>
+                </td>
+              </tr>`;
+            }
+          });
+        }
+      });
+
+      if (delinquentCount === 0) {
+        delinquentsTbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">🎉 No hay cuotas vencidas ni deudores morosos en el sistema.</td></tr>`;
+      }
+
+      document.getElementById("delinquent-count").innerText = delinquentCount;
+      document.getElementById("delinquent-fines-total").innerText = `$${finesTotalUSD.toFixed(2)}`;
+      document.getElementById("delinquent-total-amount").innerText = `$${grandDelinquentTotalUSD.toFixed(2)}`;
+    }
+
+    /* 4. RENDER DEUDAS / EGRESOS */
+    if (currentUserRole === 'master') {
+      const debtsTbody = document.getElementById("debts-table-body");
+      if (debtsTbody) {
+        debtsTbody.innerHTML = "";
+        let dPaidTotal = 0, dPendingTotal = 0, dGrandTotal = 0;
+
+        debtsData.forEach((item, itemIdx) => {
+          const totalAmt = Number(item.amount);
+          dGrandTotal += totalAmt;
+
+          if (!item.quotas) item.quotas = buildQuotasStructureFallback(item.startDate, item.frequency, totalAmt);
+
+          let quotasHtml = "";
+          item.quotas.forEach((q, quotaIdx) => {
+            if (q.status === undefined) q.status = q.paid ? 'pagado' : 'pendiente';
+
+            if (q.status === 'pagado') {
+              dPaidTotal += q.amountUSD;
+            } else {
+              dPendingTotal += q.amountUSD;
+            }
+
+            let btnClass = q.status === 'pagado' ? 'paid' : 'pending';
+            let btnText = q.status === 'pagado' ? '✅ Pagado' : '⏳ Pendiente';
+
+            quotasHtml += `
+              <div class="quota-box">
+                <div class="quota-info">
+                  <strong>Cuota ${q.num}:</strong> $${q.amountUSD.toFixed(2)} USD <br><small style="color:var(--text-muted);">${formatDate(q.dueDate)}</small>
+                </div>
+                <button class="btn-quota-status ${btnClass}" onclick="cycleQuotaStatus('debts', ${itemIdx}, ${quotaIdx})">${btnText}</button>
+              </div>
+            `;
+          });
+
+          debtsTbody.innerHTML += `<tr>
+            <td><strong style="text-transform:uppercase;">${item.type}</strong></td>
+            <td>${item.concept} <br><small style="color:var(--text-muted);">Total: $${totalAmt.toFixed(2)}</small></td>
+            <td><span style="text-transform:capitalize;">${item.frequency}</span></td>
+            <td><div style="max-height: 140px; overflow-y: auto;">${quotasHtml}</div></td>
+            <td><button class="btn-delete" onclick="deleteRecord('debts', ${itemIdx})">Eliminar</button></td>
+          </tr>`;
+        });
+
+        document.getElementById("debts-paid-amount").innerText = `$${dPaidTotal.toFixed(2)}`;
+        document.getElementById("debts-pending-amount").innerText = `$${dPendingTotal.toFixed(2)}`;
+        document.getElementById("debts-grand-total").innerText = `$${dGrandTotal.toFixed(2)}`;
+      }
+
+      /* 5. RECAUDACIÓN AUDITADA POR CUOTA INDIVIDUAL */
+      const detailTbody = document.getElementById("collected-detail-table");
+      detailTbody.innerHTML = "";
+      let loansPaidSum = 0, productsPaidSum = 0;
+
+      loansData.forEach(item => {
+        item.quotas.filter(q => q.status === 'pagado').forEach(q => {
+          let amountBS = q.amountUSD * currentBcvRate;
+          loansPaidSum += q.amountUSD;
+          let collector = q.collectedBy || item.createdBy || MASTER_USER;
+          detailTbody.innerHTML += `<tr>
+            <td><span style="color:var(--primary);font-weight:bold;">💵 Préstamo</span></td>
+            <td>${item.name}</td>
+            <td>Cuota N° ${q.num} de ${item.quotas.length}</td>
+            <td><strong style="color:var(--teal);">👤 ${collector}</strong></td>
+            <td><strong>$${q.amountUSD.toFixed(2)}</strong></td>
+            <td>Bs. ${amountBS.toFixed(2)}</td>
+          </tr>`;
+        });
+      });
+
+      productsData.forEach(item => {
+        item.quotas.filter(q => q.status === 'pagado').forEach(q => {
+          let amountBS = q.amountUSD * currentBcvRate;
+          productsPaidSum += q.amountUSD;
+          let collector = q.collectedBy || item.createdBy || MASTER_USER;
+          detailTbody.innerHTML += `<tr>
+            <td><span style="color:var(--success);font-weight:bold;">📦 Producto</span></td>
+            <td>${item.name}</td>
+            <td>Cuota N° ${q.num} de ${item.quotas.length} (${item.desc})</td>
+            <td><strong style="color:var(--teal);">👤 ${collector}</strong></td>
+            <td><strong>$${q.amountUSD.toFixed(2)}</strong></td>
+            <td>Bs. ${amountBS.toFixed(2)}</td>
+          </tr>`;
+        });
+      });
+
+      document.getElementById("collected-loans-paid").innerText = `$${loansPaidSum.toFixed(2)}`;
+      document.getElementById("collected-products-paid").innerText = `$${productsPaidSum.toFixed(2)}`;
+      document.getElementById("collected-total-paid").innerText = `$${(loansPaidSum + productsPaidSum).toFixed(2)}`;
+
+      renderMasterUsersTable();
+      renderClientRequestsTable();
+    }
+  }
+
+  function advanceOneMonth(dateStr) {
+    if (!dateStr) return dateStr;
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return dateStr;
+    let year = parseInt(parts[0], 10), month = parseInt(parts[1], 10), day = parseInt(parts[2], 10);
+    month += 1;
+    if (month > 12) { month = 1; year += 1; }
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  }
+
+  function resetMonthlyPayments(moduleType) {
+    if (confirm("¿Quieres reiniciar los cobros y actualizar las fechas al nuevo mes entrante?")) {
+      if (moduleType === 'loans') {
+        loansData.forEach(item => {
+          item.startDate = advanceOneMonth(item.startDate);
+          if (item.endDate) item.endDate = advanceOneMonth(item.endDate);
+          item.quotas = buildQuotasFromDateRange(item.startDate, item.endDate, item.frequency, (item.amount * item.rate) / 100, item.noEndDate);
+        });
+      } else if (moduleType === 'products') {
+        productsData.forEach(item => {
+          item.startDate = advanceOneMonth(item.startDate);
+          if (item.endDate) item.endDate = advanceOneMonth(item.endDate);
+          item.quotas = buildQuotasFromDateRange(item.startDate, item.endDate, item.frequency, item.amount, item.noEndDate);
+        });
+      }
+      saveData();
+    }
+  }
+
+  function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("app_theme", newTheme);
+    updateThemeIcon(newTheme);
+  }
+
+  function updateThemeIcon(theme) {
+    const btn = document.getElementById("theme-btn");
+    btn.innerHTML = theme === "dark" ? '<i data-lucide="sun" style="width:18px;"></i>' : '<i data-lucide="moon" style="width:18px;"></i>';
+    lucide.createIcons();
+  }
+
+  function updateBcvRate(val) {
+    currentBcvRate = parseFloat(val) || 0;
+    convertUsdToBs();
+    saveData();
+    renderAll();
+  }
+
+  function convertUsdToBs() {
+    const usdValue = parseFloat(document.getElementById("usd-input").value) || 0;
+    document.getElementById("bs-input").value = (usdValue * currentBcvRate).toFixed(2);
+  }
+
+  function convertBsToUsd() {
+    const bsValue = parseFloat(document.getElementById("bs-input").value) || 0;
+    document.getElementById("usd-input").value = (currentBcvRate > 0 ? bsValue / currentBcvRate : 0).toFixed(2);
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return "N/A / Indefinido";
+    const parts = dateStr.split('-');
+    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    return dateStr;
+  }
+
+  function getDaysOverdue(dateStr) {
+    if (!dateStr) return 0;
+    const today = new Date();
+    const dueDate = new Date(dateStr + "T00:00:00");
+    const diffDays = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  }
+
+  async function pickContact(nameInputId, phoneInputId) {
+    if ('contacts' in navigator && 'ContactsManager' in window) {
+      try {
+        const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
+        if (contacts && contacts.length > 0) {
+          if (contacts[0].name && contacts[0].name.length > 0) document.getElementById(nameInputId).value = contacts[0].name[0];
+          if (contacts[0].tel && contacts[0].tel.length > 0) document.getElementById(phoneInputId).value = contacts[0].tel[0];
+        }
+      } catch (ex) { alert("Acceso a contactos no disponible."); }
+    } else { alert("Acceso a contactos no soportado en este dispositivo."); }
+  }
+
+  function unlockDebtsModule() {
+    const pass = document.getElementById("debts-pass-input").value.trim();
+    if (pass === DEBTS_PASS_CORRECT) {
+      sessionStorage.setItem("debts_unlocked", "true");
+      document.getElementById("debts-lock-screen").style.display = "none";
+      document.getElementById("debts-content-screen").style.display = "block";
+      document.getElementById("debts-error").style.display = "none";
+      renderAll();
+    } else {
+      document.getElementById("debts-error").style.display = "block";
+    }
+  }
+
+  function toggleMoreMenu() {
+    const menu = document.getElementById("more-menu");
+    menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+  }
+
+  function closeMoreMenu() { document.getElementById("more-menu").style.display = "none"; }
+
+  function switchTab(tab) {
+    if (currentUserRole === 'tercero' && tab !== 'loans' && tab !== 'products') {
+      alert("⚠️ Tu tipo de usuario sólo tiene permiso para operar en los módulos de Préstamos y Productos a Crédito.");
+      return;
+    }
+
+    document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+    const tabMap = { 'loans': 0, 'products': 1, 'collected': 2 };
+    if (tabMap[tab] !== undefined) {
+      document.querySelectorAll('.nav-item')[tabMap[tab]].classList.add('active');
+    }
+
+    document.getElementById(`tab-${tab}`).classList.add('active');
+
+    if (tab === 'debts') {
+      const isUnlocked = sessionStorage.getItem("debts_unlocked");
+      if (isUnlocked === "true") {
+        document.getElementById("debts-lock-screen").style.display = "none";
+        document.getElementById("debts-content-screen").style.display = "block";
+      } else {
+        document.getElementById("debts-lock-screen").style.display = "block";
+        document.getElementById("debts-content-screen").style.display = "none";
+      }
+    }
+
+    if (tab === 'contract') populateContractClientSelect();
+
+    renderAll();
+  }
+
+  function openEditModal(moduleType, index) {
+    document.getElementById("edit-module").value = moduleType;
+    document.getElementById("edit-index").value = index;
+
+    let item = moduleType === 'loans' ? loansData[index] : (moduleType === 'products' ? productsData[index] : debtsData[index]);
+
+    document.getElementById("edit-name").value = item.name || item.concept || "";
+    document.getElementById("edit-amount").value = item.amount;
+    document.getElementById("edit-frequency").value = item.frequency || "mensual";
+    document.getElementById("edit-date").value = item.startDate || new Date().toISOString().split('T')[0];
+    document.getElementById("edit-date-end").value = item.endDate || "";
+    document.getElementById("edit-no-end").checked = !!item.noEndDate;
+    document.getElementById("edit-date-end").disabled = !!item.noEndDate;
+
+    if (moduleType === 'loans') {
+      document.getElementById("edit-phone-group").style.display = "block";
+      document.getElementById("edit-phone").value = item.phone || "";
+      document.getElementById("edit-rate-group").style.display = "block";
+      document.getElementById("edit-rate").value = item.rate || 0;
+      document.getElementById("edit-desc-group").style.display = "none";
+    } else if (moduleType === 'products') {
+      document.getElementById("edit-phone-group").style.display = "block";
+      document.getElementById("edit-phone").value = item.phone || "";
+      document.getElementById("edit-desc-group").style.display = "block";
+      document.getElementById("edit-desc").value = item.desc || "";
+      document.getElementById("edit-rate-group").style.display = "none";
+    }
+
+    document.getElementById("edit-modal").style.display = "flex";
+  }
+
+  function closeEditModal() { document.getElementById("edit-modal").style.display = "none"; }
+
+  function saveRecordEdit() {
+    const moduleType = document.getElementById("edit-module").value;
+    const index = parseInt(document.getElementById("edit-index").value, 10);
+
+    const name = document.getElementById("edit-name").value.trim();
+    const amount = parseFloat(document.getElementById("edit-amount").value);
+    const frequency = document.getElementById("edit-frequency").value;
+    const startDate = document.getElementById("edit-date").value;
+    const noEndDate = document.getElementById("edit-no-end").checked;
+    const endDate = noEndDate ? "" : document.getElementById("edit-date-end").value;
+
+    if (moduleType === 'loans') {
+      const phone = document.getElementById("edit-phone").value.trim();
+      const rate = parseFloat(document.getElementById("edit-rate").value) || 0;
+      const gainTotal = (amount * rate) / 100;
+
+      loansData[index] = {
+        ...loansData[index],
+        name, phone, amount, rate, frequency, startDate, endDate, noEndDate,
+        quotas: buildQuotasFromDateRange(startDate, endDate, frequency, gainTotal, noEndDate)
+      };
+    } else if (moduleType === 'products') {
+      const phone = document.getElementById("edit-phone").value.trim();
+      const desc = document.getElementById("edit-desc").value.trim();
+
+      productsData[index] = {
+        ...productsData[index],
+        name, phone, desc, amount, frequency, startDate, endDate, noEndDate,
+        quotas: buildQuotasFromDateRange(startDate, endDate, frequency, amount, noEndDate)
+      };
+    }
+
+    saveData();
+    closeEditModal();
+  }
+
+  function openReminderModal(moduleType, itemIdx, quotaIdx) {
+    document.getElementById("remind-module").value = moduleType;
+    document.getElementById("remind-item-idx").value = itemIdx;
+    document.getElementById("remind-quota-idx").value = quotaIdx;
+    document.getElementById("remind-bcv").value = currentBcvRate;
+    updateReminderMessage();
+    document.getElementById("reminder-modal").style.display = "flex";
+  }
+
+  function closeReminderModal() { document.getElementById("reminder-modal").style.display = "none"; }
+
+  function updateReminderMessage() {
+    const mod = document.getElementById("remind-module").value;
+    const itemIdx = document.getElementById("remind-item-idx").value;
+    const quotaIdx = document.getElementById("remind-quota-idx").value;
+    const bcv = parseFloat(document.getElementById("remind-bcv").value) || 0;
+
+    let item = mod === 'loans' ? loansData[itemIdx] : productsData[itemIdx];
+    let quota = item.quotas[quotaIdx];
+    let daysOverdue = getDaysOverdue(quota.dueDate);
+    let fineUSD = calculateFineUSD(daysOverdue);
+
+    let baseBS = quota.amountUSD * bcv;
+    let fineBS = fineUSD * bcv;
+    let totalUSD = quota.amountUSD + fineUSD;
+    let totalBS = totalUSD * bcv;
+
+    let text = "";
+    if (daysOverdue > 0 || quota.status === 'moroso') {
+      text = `⚠️ *NOTIFICACIÓN DE MORA - VANGUARD CAPITAL* ⚠️\n\n`;
+      text += `Estimado(a) *${item.name}*,\nLe informamos sobre su cuota vencida con morosidad:\n\n`;
+      text += `• *Concepto:* ${mod === 'loans' ? 'Interés Préstamo' : item.desc} (Cuota ${quota.num} de ${item.quotas.length})\n`;
+      text += `• *Días de Atraso:* ${daysOverdue} días de retraso\n`;
+      text += `• *Cuota Base:* $${quota.amountUSD.toFixed(2)} USD (Bs. ${baseBS.toFixed(2)})\n`;
+      text += `• *Multa por Mora:* $${fineUSD.toFixed(2)} USD (Bs. ${fineBS.toFixed(2)})\n`;
+      text += `• *TOTAL A CANCELAR:* $${totalUSD.toFixed(2)} USD / Bs. ${totalBS.toFixed(2)} (BCV: ${bcv.toFixed(2)})\n\n`;
+      text += `Le solicitamos cancelar su cuota a la brevedad para evitar recargos adicionales. ¡Gracias!`;
+    } else {
+      text = `📌 *RECORDATORIO DE COBRO - VANGUARD CAPITAL* 📌\n\n`;
+      text += `Hola *${item.name}*, recordatorio de tu cuota programada:\n\n`;
+      text += `• *Concepto:* ${mod === 'loans' ? 'Interés Préstamo' : item.desc} (Cuota ${quota.num} de ${item.quotas.length})\n`;
+      text += `• *Fecha Límite:* ${formatDate(quota.dueDate)}\n`;
+      text += `• *Monto Cuota:* $${quota.amountUSD.toFixed(2)} USD\n`;
+      if (bcv > 0) text += `• *Monto en Bolívares (BCV ${bcv.toFixed(2)}):* Bs. ${baseBS.toFixed(2)}\n`;
+      text += `\n¡Agradecemos tu oportuno pago!`;
+    }
+
+    document.getElementById("remind-message").value = text;
+  }
+
+  function sendReminderWhatsApp() {
+    const mod = document.getElementById("remind-module").value;
+    const itemIdx = document.getElementById("remind-item-idx").value;
+    const item = mod === 'loans' ? loansData[itemIdx] : productsData[itemIdx];
+    const text = encodeURIComponent(document.getElementById("remind-message").value);
+    const cleanPhone = item.phone ? item.phone.replace(/[^0-9]/g, '') : '';
+    closeReminderModal();
+    window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${text}`, '_blank');
+  }
+
+  function openReceiptModal(moduleType, itemIdx, quotaIdx) {
+    document.getElementById("receipt-module").value = moduleType;
+    document.getElementById("receipt-item-idx").value = itemIdx;
+    document.getElementById("receipt-quota-idx").value = quotaIdx;
+    document.getElementById("receipt-ref").value = "Ref-" + Math.floor(100000 + Math.random() * 900000);
+    updateReceiptPreview();
+    document.getElementById("receipt-modal").style.display = "flex";
+  }
+
+  function closeReceiptModal() { document.getElementById("receipt-modal").style.display = "none"; }
+
+  function generateReceiptText() {
+    const mod = document.getElementById("receipt-module").value;
+    const itemIdx = document.getElementById("receipt-item-idx").value;
+    const quotaIdx = document.getElementById("receipt-quota-idx").value;
+    const ref = document.getElementById("receipt-ref").value.trim() || "N/A";
+
+    let item = mod === 'loans' ? loansData[itemIdx] : productsData[itemIdx];
+    let quota = item.quotas[quotaIdx];
+    let daysOverdue = getDaysOverdue(quota.dueDate);
+    let fineUSD = calculateFineUSD(daysOverdue);
+
+    let baseBS = quota.amountUSD * currentBcvRate;
+    let fineBS = fineUSD * currentBcvRate;
+    let totalUSD = quota.amountUSD + fineUSD;
+    let totalBS = totalUSD * currentBcvRate;
+    let dateStr = new Date().toLocaleDateString('es-ES');
+
+    let text = `🧾 *RECIBO OFICIAL DE COBRO* 🧾\n🏛 *VANGUARD CAPITAL & TECH*\n-----------------------------------\n👤 *Cliente:* ${item.name}\n👤 *Atendido por:* ${currentUsername}\n📅 *Fecha de Pago:* ${dateStr}\n📌 *Detalle:* ${mod === 'loans' ? 'Interés Préstamo' : item.desc} (Cuota N° ${quota.num} de ${item.quotas.length})\n`;
+
+    if (fineUSD > 0 || quota.status === 'moroso') {
+      text += `⏱️ *Días de Atraso:* ${daysOverdue} días\n💵 *Cuota Base:* $${quota.amountUSD.toFixed(2)} USD (Bs. ${baseBS.toFixed(2)})\n⚠️ *Multa Aplicada:* $${fineUSD.toFixed(2)} USD (Bs. ${fineBS.toFixed(2)})\n💰 *TOTAL RECIBIDO ($):* $${totalUSD.toFixed(2)} USD\n🇻🇪 *TOTAL RECIBIDO (Bs):* Bs. ${totalBS.toFixed(2)} (BCV: ${currentBcvRate.toFixed(2)})\n`;
+    } else {
+      text += `💵 *Monto Recibido ($):* $${quota.amountUSD.toFixed(2)} USD\n🇻🇪 *Monto Recibido (Bs):* Bs. ${baseBS.toFixed(2)} (BCV: ${currentBcvRate.toFixed(2)})\n`;
+    }
+
+    text += `🏦 *Referencia:* ${ref}\n-----------------------------------\n✅ *ESTADO DE CUOTA: SOLVENTE / PAGADA*\n¡Gracias por su pago!`;
+    return text;
+  }
+
+  function updateReceiptPreview() { document.getElementById("receipt-preview").innerText = generateReceiptText(); }
+
+  function populateContractClientSelect() {
+    const select = document.getElementById("contract-client-select");
+    select.innerHTML = `<option value="">-- Seleccionar de la base de datos --</option>`;
+
+    loansData.forEach((item, idx) => {
+      select.innerHTML += `<option value="loan_${idx}">💵 Préstamo: ${item.name} ($${((item.amount * item.rate) / 100).toFixed(2)})</option>`;
+    });
+
+    productsData.forEach((item, idx) => {
+      select.innerHTML += `<option value="product_${idx}">📦 Producto: ${item.name} ($${Number(item.amount).toFixed(2)})</option>`;
+    });
+  }
+
+  function loadContractClientData() {
+    const val = document.getElementById("contract-client-select").value;
+    if (!val) return;
+
+    const parts = val.split('_');
+    const type = parts[0];
+    const idx = parseInt(parts[1], 10);
+
+    let item = type === 'loan' ? loansData[idx] : productsData[idx];
+
+    document.getElementById("contract-fullname").value = item.name || "";
+    document.getElementById("contract-phone").value = item.phone || "";
+    document.getElementById("contract-ci").value = item.ci || "V-";
+    document.getElementById("contract-address").value = item.address || "Mérida, Estado Mérida";
+    document.getElementById("contract-workplace").value = item.workplace || "Particular";
+
+    generateContractDocument();
+  }
+
+  function generateContractDocument() {
+    const val = document.getElementById("contract-client-select").value;
+    const fullname = document.getElementById("contract-fullname").value.trim() || "[NOMBRE COMPLETO DEUDOR]";
+    const phone = document.getElementById("contract-phone").value.trim() || "[TELÉFONO DEUDOR]";
+    const ci = document.getElementById("contract-ci").value.trim() || "[CÉDULA DEUDOR]";
+    const maritalStatus = document.getElementById("contract-marital-status").value;
+    const address = document.getElementById("contract-address").value.trim() || "[DIRECCIÓN HABITACIÓN]";
+    const workplace = document.getElementById("contract-workplace").value.trim() || "[LUGAR DE TRABAJO]";
+
+    document.getElementById("doc-fullname").innerText = fullname;
+    document.getElementById("doc-phone").innerText = phone;
+    document.getElementById("doc-ci").innerText = ci;
+    document.getElementById("doc-marital-status").innerText = maritalStatus;
+    document.getElementById("doc-address").innerText = address;
+    document.getElementById("doc-workplace").innerText = workplace;
+    document.getElementById("doc-sig-fullname").innerText = fullname;
+    document.getElementById("doc-sig-ci").innerText = ci;
+    document.getElementById("doc-sig-phone").innerText = phone;
+
+    const now = new Date();
+    document.getElementById("doc-current-day").innerText = String(now.getDate()).padStart(2, '0');
+    
+    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    document.getElementById("doc-current-month").innerText = monthNames[now.getMonth()];
+    document.getElementById("doc-current-year").innerText = now.getFullYear();
+
+    if (!val) {
+      document.getElementById("doc-start-date").innerText = "--/--/----";
+      document.getElementById("doc-debt-concept").innerText = "[CONCEPTO DE LA DEUDA]";
+      document.getElementById("doc-total-usd").innerText = "$0.00 USD";
+      document.getElementById("doc-quotas-table").style.display = "table";
+      document.getElementById("doc-quotas-tbody").innerHTML = `<tr><td colspan="5">Seleccione un cliente para proyectar el calendario legal de pagos.</td></tr>`;
+      return;
+    }
+
+    const parts = val.split('_');
+    const type = parts[0];
+    const idx = parseInt(parts[1], 10);
+
+    let item = type === 'loan' ? loansData[idx] : productsData[idx];
+
+    let debtConceptStr = "";
+    let totalAmtUSD = 0;
+
+    if (type === 'loan') {
+      const gainTotal = (item.amount * item.rate) / 100;
+      debtConceptStr = `Préstamo civil de dinero en efectivo/transferencia por la suma de $${Number(item.amount).toFixed(2)} USD, devengando un rendimiento fijado del ${item.rate}% ($${gainTotal.toFixed(2)} USD).`;
+      totalAmtUSD = gainTotal;
+    } else {
+      debtConceptStr = `Venta a crédito del bien/mercancía: "${item.desc}" por un valor pactado de $${Number(item.amount).toFixed(2)} USD.`;
+      totalAmtUSD = Number(item.amount);
+    }
+
+    document.getElementById("doc-start-date").innerText = formatDate(item.startDate);
+    document.getElementById("doc-debt-concept").innerText = debtConceptStr;
+    document.getElementById("doc-total-usd").innerText = `$${totalAmtUSD.toFixed(2)} USD`;
+    document.getElementById("doc-bcv-rate").innerText = `Bs. ${currentBcvRate.toFixed(2)}`;
+
+    const isNoEndDate = !!item.noEndDate || !item.endDate;
+    const clauseThirdTextElem = document.getElementById("doc-clause-third-text");
+    const quotasTableElem = document.getElementById("doc-quotas-table");
+
+    if (isNoEndDate) {
+      clauseThirdTextElem.innerHTML = `<strong>TERCERA (PLAZO E INDEFINICIÓN DE CUOTA FINAL):</strong> Las partes acuerdan expresamente que la presente obligación no posee un cronograma de vencimiento fijo ni cuotas parciales periódicas. En consecuencia, EL DEUDOR se compromete a liquidar la totalidad de la deuda por la cantidad de <strong>$${totalAmtUSD.toFixed(2)} USD</strong> (o su equivalente en Bolívares según la tasa BCV del día de pago) en un <strong>único pago a la fecha de vencimiento o al ser requerido formalmente por EL ACREEDOR</strong>.`;
+      quotasTableElem.style.display = "none";
+    } else {
+      quotasTableElem.style.display = "table";
+      clauseThirdTextElem.innerHTML = `<strong>TERCERA (CALENDARIO DE PAGO Y PLAZOS):</strong> EL DEUDOR se obliga a cancelar el saldo total adeudado conforme al plazo estipulado que inicia el <strong>${formatDate(item.startDate)}</strong> y culmina el <strong>${formatDate(item.endDate)}</strong>, desglosado en un total de <strong>${item.quotas ? item.quotas.length : 1}</strong> cuota(s) de frecuencia <strong>${item.frequency || 'mensual'}</strong>, según la siguiente tabla de vencimiento:`;
+
+      let tbodyHtml = "";
+      if (item.quotas) {
+        item.quotas.forEach(q => {
+          let amtBS = q.amountUSD * currentBcvRate;
+          tbodyHtml += `<tr>
+            <td>Cuota N° ${q.num}</td>
+            <td>${formatDate(q.dueDate)}</td>
+            <td>$${q.amountUSD.toFixed(2)} USD</td>
+            <td>Bs. ${currentBcvRate.toFixed(2)}</td>
+            <td>Bs. ${amtBS.toFixed(2)}</td>
+          </tr>`;
+        });
+      }
+      document.getElementById("doc-quotas-tbody").innerHTML = tbodyHtml;
+    }
+  }
+
+  function sendContractWhatsApp() {
+    const val = document.getElementById("contract-client-select").value;
+    if (!val) return alert("Selecciona un cliente de la lista para enviar el contrato por WhatsApp.");
+
+    const parts = val.split('_');
+    const type = parts[0];
+    const idx = parseInt(parts[1], 10);
+    let item = type === 'loan' ? loansData[idx] : productsData[idx];
+
+    const fullname = document.getElementById("contract-fullname").value.trim() || item.name;
+    const phone = document.getElementById("contract-phone").value.trim() || item.phone;
+    const ci = document.getElementById("contract-ci").value.trim() || "V-";
+    
+    let totalUSD = type === 'loan' ? ((item.amount * item.rate) / 100) : Number(item.amount);
+    let totalBS = totalUSD * currentBcvRate;
+    const isNoEndDate = !!item.noEndDate || !item.endDate;
+
+    let text = `📜 *CONTRATO PRIVADO DE RECONOCIMIENTO DE DEUDA Y PLAN DE PAGO* 📜\n\n`;
+    text += `🏛 *ACREEDOR:* VANGUARD CAPITAL & TECH - Brayan Yosue Ramírez Uzcátegui (C.I. V-22.658.780)\n`;
+    text += `👤 *DEUDOR:* ${fullname} (C.I. ${ci})\n`;
+    text += `📞 *TELÉFONO DEUDOR:* ${phone}\n\n`;
+    text += `📌 *CONCEPTO:* ${type === 'loan' ? 'Interés Préstamo Civil' : item.desc}\n`;
+    text += `📅 *FECHA DE INICIO:* ${formatDate(item.startDate)}\n`;
+
+    if (isNoEndDate) {
+      text += `📅 *PLAZO:* SIN FECHA FINAL (Pago único a requerimiento)\n`;
+      text += `💰 *MONTO TOTAL:* $${totalUSD.toFixed(2)} USD (Bs. ${totalBS.toFixed(2)} a BCV: ${currentBcvRate.toFixed(2)})\n\n`;
+    } else {
+      text += `📅 *FECHA LÍMITE FINAL:* ${formatDate(item.endDate)}\n`;
+      text += `💰 *MONTO TOTAL:* $${totalUSD.toFixed(2)} USD (Bs. ${totalBS.toFixed(2)} a BCV: ${currentBcvRate.toFixed(2)})\n`;
+      text += `🔢 *TOTAL DE CUOTAS:* ${item.quotas ? item.quotas.length : 1} cuota(s) (${item.frequency})\n\n`;
+      text += `🗓 *CALENDARIO DE PAGOS:* \n`;
+      if (item.quotas) {
+        item.quotas.forEach(q => {
+          text += `• Cuota ${q.num}: $${q.amountUSD.toFixed(2)} USD - Vence: ${formatDate(q.dueDate)}\n`;
+        });
+      }
+    }
+
+    text += `\n⚠️ *PENALIDAD POR MORA:* $2 USD / 2 días, $10 USD / 15 días y $20 USD / mes de retraso.\n`;
+    text += `⚖️ *JURISDICCIÓN:* Sometimiento expreso a los Tribunales Ordinarios de la Circunscripción Judicial del Estado Mérida en caso de incumplimiento.`;
+
+    const cleanPhone = phone ? phone.replace(/[^0-9]/g, '') : '';
+    window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(text)}`, '_blank');
+  }
+
+  function addWorkIncome(event) {
+    event.preventDefault();
+    const concept = document.getElementById("work-concept").value.trim();
+    const client = document.getElementById("work-client").value.trim() || "Particular";
+    const amount = parseFloat(document.getElementById("work-amount").value);
+    const date = document.getElementById("work-date").value;
+
+    workIncomeData.push({ concept, client, amount, date, paid: true });
+    saveData();
+    event.target.reset();
+  }
+
+  function addExpenseItem(event) {
+    event.preventDefault();
+    const type = document.getElementById("expense-type").value;
+    const concept = document.getElementById("expense-concept").value.trim();
+    const amount = parseFloat(document.getElementById("expense-amount").value);
+    const frequency = document.getElementById("expense-frequency").value;
+    const startDate = document.getElementById("expense-date").value;
+
+    const mappedFreq = { '1': 'mensual', '2': 'quincenal', '4': 'semanal' }[frequency] || 'mensual';
+    const quotas = buildQuotasStructureFallback(startDate, mappedFreq, amount);
+
+    debtsData.push({ type, concept, amount, frequency: mappedFreq, startDate, quotas });
+    saveData();
+    event.target.reset();
+  }
+
+  function addDailyExpense(event) {
+    event.preventDefault();
+    const desc = document.getElementById("daily-expense-desc").value.trim();
+    const amount = parseFloat(document.getElementById("daily-expense-amount").value);
+    const date = document.getElementById("daily-expense-date").value;
+
+    dailyExpensesData.push({ desc, amount, date });
+    saveData();
+    event.target.reset();
+  }
+
+  function captureBimonthlySnapshot() {
+    let lIntProyectado = 0;
+    loansData.forEach(item => lIntProyectado += (item.amount * item.rate) / 100);
+
+    let pCap = 0;
+    productsData.forEach(item => pCap += Number(item.amount));
+
+    let workTotal = 0;
+    workIncomeData.forEach(item => workTotal += Number(item.amount));
+
+    let lPaidTotal = 0;
+    loansData.forEach(item => {
+      item.quotas.filter(q => q.status === 'pagado').forEach(q => lPaidTotal += q.amountUSD);
+    });
+
+    let pPaidTotal = 0;
+    productsData.forEach(item => {
+      item.quotas.filter(q => q.status === 'pagado').forEach(q => pPaidTotal += q.amountUSD);
+    });
+
+    let workPaid = 0;
+    workIncomeData.filter(i => i.paid !== false).forEach(i => workPaid += Number(i.amount));
+
+    let debtsGrandTotal = 0;
+    debtsData.forEach(item => debtsGrandTotal += Number(item.amount));
+
+    let dailyExpensesSum = 0;
+    dailyExpensesData.forEach(item => dailyExpensesSum += Number(item.amount));
+
+    const totalIncome = lIntProyectado + pCap + workTotal;
+    const totalCollected = lPaidTotal + pPaidTotal + workPaid;
+    const totalExpenses = debtsGrandTotal + dailyExpensesSum;
+    const netResult = totalIncome - totalExpenses;
+
+    const dateStr = new Date().toLocaleDateString('es-ES');
+    const label = `Bimestre ${bimonthlySnapshots.length + 1} (${dateStr})`;
+
+    bimonthlySnapshots.push({
+      label, date: dateStr, income: totalIncome, collected: totalCollected, expenses: totalExpenses, net: netResult
+    });
+
+    saveData();
+    alert("Cierre bimensual guardado con éxito.");
+  }
+
+  checkSession();
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+</body>
+</html>
